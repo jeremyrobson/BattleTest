@@ -14,6 +14,6 @@ namespace BattleTest
         int CTR { get; set; }
         int CT { get; set; }
         void tick();
-        void invoke(BattleTile[,] tiles);
+        void invoke(BattleMap map, List<BattleUnit> units, BattleQueue queue);
     }
 }

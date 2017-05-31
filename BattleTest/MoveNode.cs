@@ -32,10 +32,15 @@ namespace BattleTest
 
         public void draw(Graphics g)
         {
+            g.FillRectangle(brush, x * GameBattle.TILE_WIDTH, y * GameBattle.TILE_HEIGHT, GameBattle.TILE_WIDTH, GameBattle.TILE_HEIGHT);
+        }
+
+        public void recursiveDraw(Graphics g)
+        {
             MoveNode node = this;
             while (node != null)
             {
-                g.FillRectangle(brush, node.x * GameBattle.TILE_WIDTH, node.y * GameBattle.TILE_HEIGHT, GameBattle.TILE_WIDTH, GameBattle.TILE_HEIGHT);
+                node.draw(g);
                 node = node.parent;
             }
         }

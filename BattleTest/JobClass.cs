@@ -8,18 +8,19 @@ namespace BattleTest
 {
     class JobClass
     {
-        public static JobClass squire;
-
         public string name;
         public List<ActionDefinition> actions;
 
-        public JobClass singleton()
+        public static JobClass squire
         {
-            squire = new JobClass();
-            squire.name = "Squire";
-            squire.actions = new List<ActionDefinition>();
-            squire.actions.Add(ActionDefinition.singleton());
-            return squire;
+            get
+            {
+                JobClass squire = new JobClass();
+                squire.name = "Squire";
+                squire.actions = new List<ActionDefinition>();
+                squire.actions.Add(ActionDefinition.melee);
+                return squire;
+            }
         }
     }
 }

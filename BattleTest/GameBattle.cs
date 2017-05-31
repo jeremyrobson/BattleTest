@@ -14,7 +14,7 @@ namespace BattleTest
         public const int TILE_WIDTH = 32;
         public const int TILE_HEIGHT = 32;
 
-        Graphics g;
+        BufferedGraphics bg;
         BattleQueue queue;
         BattleMap map;
         List<BattleUnit> units;
@@ -22,9 +22,11 @@ namespace BattleTest
         public static string consoleBuffer { get; set; }
         public static int consoleCount;
 
-        public GameBattle(Graphics g)
+        public static List<MoveNode> mapNodes;
+
+        public GameBattle(BufferedGraphics bg)
         {
-            this.g = g;
+            this.bg = bg;
 
             map = new BattleMap(MAP_WIDTH, MAP_HEIGHT);
 
@@ -41,7 +43,7 @@ namespace BattleTest
         {
             if (activeItem != null)
             {
-                activeItem.invoke();
+                activeItem.invoke(map, units, queue);  
                 activeItem = null;
             }
             else
@@ -54,8 +56,16 @@ namespace BattleTest
 
         public void draw()
         {
-            map.draw(g);
-            units.ForEach(unit => unit.draw(g));
+            map.draw(bg.Graphics);
+
+            if (mapNodes != null)
+            {
+                mapNodes.ForEach(node => node.draw(bg.Graphics));
+            }
+
+            units.ForEach(unit => unit.draw(bg.Graphics));
+
+            bg.Render();
         }
 
         public static bool listHasPoint(List<Point> list, int x, int y)

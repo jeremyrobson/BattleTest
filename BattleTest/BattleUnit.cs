@@ -19,7 +19,7 @@ namespace BattleTest
         public string team;
         public string sprite;
         public BattleAction action;
-        public int move = 3;
+        public int moveLimit = 5;
         public int agl;
         public string status;
         public JobClass jobclass;
@@ -51,6 +51,8 @@ namespace BattleTest
             this.team = team;
             this.x = x;
             this.y = y;
+
+            jobclass = JobClass.squire;
             agl = random.Next(3, 10);
             Priority = 0;
             CTR = 0;
@@ -88,11 +90,63 @@ namespace BattleTest
             }
         }
 
-        public void invoke(BattleTile[,] tiles)
+        public void invoke(BattleMap map, List<BattleUnit> units, BattleQueue queue)
         {
             GameBattle.WriteLine(name + " invoked");
 
-            done();
+            //this.safetyMap = generateSafetyMap(battle.units, this);
+            List<BattleAction> coverage = BattleAction.generateCoverage(map, units, this);
+
+            if (!moved && !acted)
+            {
+                if (action != null)
+                {
+                    GameBattle.WriteLine("Unit No. " + action.actor.name + " is already preparing to act.");
+                    //todo: if action is sticky, allow movement
+                    acted = true;
+                }
+                else
+                {
+                    action = coverage.First();  //supposedly the best action
+
+                    //requires move
+                    if (action.node.x != x || this.action.node.y != y)
+                    {
+                        queue.add(new BattleMove(this, action.node));
+                        //queue.add(this.actionmove);  //why is this here???
+                        moved = true;
+                    }
+                    else
+                    {
+                        queue.add(action);
+                        acted = true;
+                    }
+                }
+            }
+            else if (acted && !moved)
+            {
+                queue.add(new BattleMove(this, coverage[0].node));
+                done();
+            }
+            else if (!acted && moved)
+            {
+                if (action != null)
+                {
+                    GameBattle.WriteLine("I SAID Unit No. " + action.actor.name + " is already preparing to act!!!");
+                }
+                else
+                {
+                    action = coverage[0];
+                    queue.add(action);
+                }
+                acted = true;
+                done();
+            }
+            else
+            {
+                //battle.queue.add(new DoNothing(battle, this));
+                done();
+            }
         }
 
         public void done()

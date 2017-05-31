@@ -11,7 +11,7 @@ namespace BattleTest
     {
         int width;
         int height;
-        BattleTile[,] tiles;
+        public BattleTile[,] tiles;
 
         public BattleMap(int width, int height)
         {
@@ -25,16 +25,41 @@ namespace BattleTest
             {
                 for (int y = 0; y < height; y++)
                 {
-                    if (random.Next(0, 3) == 0)
-                    {
-                        tiles[x,y] = new BattleTile(x, y, "water");
-                    }
-                    else
-                    {
+                    //if (random.Next(0, 3) == 0)
+                    //{
+                        //tiles[x,y] = new BattleTile(x, y, "water");
+                    //}
+                    //else
+                    //{
                         tiles[x, y] = new BattleTile(x, y, "grass");
-                    }
+                    //}
                 }
             }
+        }
+
+        public void moveUnit(ref BattleUnit unit, int x, int y)
+        {
+            tiles[unit.x,unit.y].removeUnit(unit);
+            unit.x = x;
+            unit.y = y;
+            tiles[x,y].addUnit(unit);
+
+            GameBattle.WriteLine(unit.name + " moved to " + x + ", " + y);
+
+            if (tiles[x,y].units.Count > 1)
+            {
+                throw new Exception("error: units overlapped");
+            }
+        }
+
+        public List<BattleUnit> getTileUnits(int x, int y)
+        {
+            return tiles[x, y].units;
+        }
+
+        public BattleUnit getFirstTileUnit(int x, int y)
+        {
+            return tiles[x, y].getFirstUnit();
         }
 
         public void draw(Graphics g)
@@ -100,7 +125,7 @@ namespace BattleTest
                         continue; //skip this node
                     }
 
-                    var mapUnit = tiles[x,y].units[0];
+                    var mapUnit = tiles[x, y].getFirstUnit();
 
                     //filter our enemy units
                     if (filtered)

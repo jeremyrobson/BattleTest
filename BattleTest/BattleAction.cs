@@ -10,7 +10,7 @@ namespace BattleTest
     class BattleAction : IQueueable, IComparable<BattleAction>
     {
         public BattleUnit actor;
-        public int range;
+        //public int range;
         public List<Point> spread;
         public int targetX;
         public int targetY;
@@ -50,12 +50,12 @@ namespace BattleTest
             }
         }
 
-        public void invoke(BattleTile[,] tiles)
+        public void invoke(BattleMap map, List<BattleUnit> units, BattleQueue queue)
         {
             List<ITargetable> targets = new List<ITargetable>();
 
             spread.ForEach(s => {
-                ITargetable target = tiles[s.X, s.Y].getUnits()[0];
+                ITargetable target = map.getTileUnits(s.X, s.Y)[0];
                 if (target != null)
                 {
                     targets.Add(target);
@@ -162,16 +162,29 @@ namespace BattleTest
             return score;
         }
 
+        public static BattleAction getDefaultAction(BattleUnit actor)
+        {
+            BattleAction defaultAction = new BattleAction(actor);
+
+            defaultAction.node = new MoveNode(actor.x, actor.y, 0, null);
+            defaultAction.actiondef = ActionDefinition.nothing;
+            defaultAction.spread = new List<Point>();
+
+            return defaultAction;
+        }
+
         //generate action coverage for a particular unit
-        public static List<BattleAction> generateCoverage(BattleTile[,] tiles, List<BattleUnit> units, BattleUnit unit)
+        public static List<BattleAction> generateCoverage(BattleMap map, List<BattleUnit> units, BattleUnit unit)
         {
             double min = 0, max = 1;
             List<BattleAction> coverage = new List<BattleAction>();
-            List<MoveNode> mapNodes = BattleMap.getMapNodes(tiles, GameBattle.MAP_WIDTH, GameBattle.MAP_HEIGHT, units, unit, -999); //list of possible move nodes
+            coverage.Add(getDefaultAction(unit));
 
-            mapNodes = mapNodes.Where(node => node.steps <= unit.move).ToList();
+            List<MoveNode> mapNodes = BattleMap.getMapNodes(map.tiles, GameBattle.MAP_WIDTH, GameBattle.MAP_HEIGHT, units, unit, -999); //list of possible move nodes
 
-            //unit.mapNodes = mapNodes;
+            mapNodes = mapNodes.Where(node => node.steps <= unit.moveLimit).ToList();
+
+            GameBattle.mapNodes = mapNodes;
 
             unit.jobclass.actions.ForEach(actiondef => {
                 mapNodes.ForEach(node => {
@@ -199,12 +212,12 @@ namespace BattleTest
                                 }
                                 else
                                 {
-                                    target = tiles[x,y].getUnits()[0]; //get the unit at target node
+                                    target = map.getFirstTileUnit(x, y); //get the unit at target node
                                 }
 
                                 if (target != null)
                                 {
-                                    var damage = getDamage(unit, target, actiondef); //get damage
+                                    int damage = getDamage(unit, target, actiondef); //get damage
                                     totalScore += getScore(unit, target, damage); //get score from damage
                                     totalDamage += damage; //add damage to running total for this action
                                 }
@@ -237,9 +250,9 @@ namespace BattleTest
 
                         min = totalScore < min ? totalScore : min;
                         max = totalScore > max ? totalScore : max;
-                    });
-                });
-            });
+                    }); //diamond
+                }); //mapNodes
+            }); //actions
 
             //normalization of scores
             coverage.ForEach(c => {

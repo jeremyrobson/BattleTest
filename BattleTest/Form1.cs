@@ -13,6 +13,9 @@ namespace BattleTest
     public partial class Form1 : Form
     {
         Graphics g;
+        BufferedGraphics bg;
+        BufferedGraphicsContext bgc;
+
         Timer timer;
         GameBattle battle;
 
@@ -20,9 +23,9 @@ namespace BattleTest
         {
             InitializeComponent();
 
-            g = pictureBox1.CreateGraphics();
-
-            battle = new GameBattle(g);
+            bgc = BufferedGraphicsManager.Current;
+            bg = bgc.Allocate(pictureBox1.CreateGraphics(), pictureBox1.DisplayRectangle);
+            battle = new GameBattle(bg);
 
             timer = new Timer();
             timer.Tick += new EventHandler(loop);

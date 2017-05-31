@@ -22,6 +22,7 @@ namespace BattleTest
             this.x = x;
             this.y = y;
             this.type = type;
+            units = new List<BattleUnit>();
 
             if (type == "grass")
             {
@@ -41,6 +42,11 @@ namespace BattleTest
         public void removeUnit(BattleUnit unit)
         {
             units.Remove(unit);
+        }
+
+        public BattleUnit getFirstUnit()
+        {
+            return units.FirstOrDefault();
         }
 
         public List<BattleUnit> getUnits()

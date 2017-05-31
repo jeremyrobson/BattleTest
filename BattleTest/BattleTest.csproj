@@ -48,6 +48,7 @@
     <Compile Include="ActionDefinition.cs" />
     <Compile Include="BattleAction.cs" />
     <Compile Include="BattleMap.cs" />
+    <Compile Include="BattleMove.cs" />
     <Compile Include="BattleQueue.cs" />
     <Compile Include="BattleTile.cs" />
     <Compile Include="BattleUnit.cs" />
