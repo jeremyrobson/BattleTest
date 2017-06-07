@@ -44,19 +44,19 @@
             // 
             // textQueue
             // 
-            this.textQueue.Location = new System.Drawing.Point(678, 13);
+            this.textQueue.Location = new System.Drawing.Point(12, 498);
             this.textQueue.Multiline = true;
             this.textQueue.Name = "textQueue";
-            this.textQueue.Size = new System.Drawing.Size(254, 389);
+            this.textQueue.Size = new System.Drawing.Size(360, 79);
             this.textQueue.TabIndex = 1;
             // 
             // textConsole
             // 
-            this.textConsole.Location = new System.Drawing.Point(12, 509);
+            this.textConsole.Location = new System.Drawing.Point(658, 12);
             this.textConsole.Multiline = true;
             this.textConsole.Name = "textConsole";
             this.textConsole.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textConsole.Size = new System.Drawing.Size(640, 63);
+            this.textConsole.Size = new System.Drawing.Size(282, 480);
             this.textConsole.TabIndex = 2;
             // 
             // Form1

@@ -15,14 +15,16 @@ namespace BattleTest
         public const int TILE_HEIGHT = 32;
 
         BufferedGraphics bg;
-        BattleQueue queue;
+        public static BattleQueue queue;
         BattleMap map;
         List<BattleUnit> units;
         IQueueable activeItem;
         public static string consoleBuffer { get; set; }
         public static int consoleCount;
 
-        public static List<MoveNode> mapNodes;
+        //public static List<MoveNode> mapNodes;
+        //public static BattleMove battleMove;
+        //public static BattleAction battleAction;
 
         public GameBattle(BufferedGraphics bg)
         {
@@ -32,7 +34,9 @@ namespace BattleTest
 
             units = new List<BattleUnit>();
             units.Add(new BattleUnit("alfred","cpu1",0,0));
-            units.Add(new BattleUnit("bob", "cpu2", 5, 5));
+            units.Add(new BattleUnit("bob", "cpu2", 2, 2));
+
+            map.addUnits(units);
 
             queue = new BattleQueue(units);
 
@@ -43,8 +47,12 @@ namespace BattleTest
         {
             if (activeItem != null)
             {
-                activeItem.invoke(map, units, queue);  
-                activeItem = null;
+                activeItem.invoke(map, units, queue);
+
+                if (activeItem.Done)
+                {
+                    activeItem = null;
+                }
             }
             else
             {
@@ -58,10 +66,24 @@ namespace BattleTest
         {
             map.draw(bg.Graphics);
 
+            /*
             if (mapNodes != null)
             {
                 mapNodes.ForEach(node => node.draw(bg.Graphics));
             }
+
+            if (battleMove != null)
+            {
+                battleMove.draw(bg.Graphics);
+            }
+
+            if (battleAction != null)
+            {
+                battleAction.draw(bg.Graphics);
+            }
+            */
+
+            queue.draw(bg.Graphics);
 
             units.ForEach(unit => unit.draw(bg.Graphics));
 

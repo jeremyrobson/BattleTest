@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BattleTest
 {
@@ -37,14 +35,17 @@ namespace BattleTest
             }
         }
 
+        public void addUnits(List<BattleUnit> units)
+        {
+            units.ForEach(unit => this.tiles[unit.x, unit.y].addUnit(unit));
+        }
+
         public void moveUnit(ref BattleUnit unit, int x, int y)
         {
             tiles[unit.x,unit.y].removeUnit(unit);
             unit.x = x;
             unit.y = y;
             tiles[x,y].addUnit(unit);
-
-            GameBattle.WriteLine(unit.name + " moved to " + x + ", " + y);
 
             if (tiles[x,y].units.Count > 1)
             {
@@ -73,6 +74,53 @@ namespace BattleTest
             }
         }
 
+        public static double getTileSafetyScore(List<BattleUnit> units, BattleUnit unit, int x, int y)
+        {
+            double safetyScore = 0;
+
+            foreach (BattleUnit u in units)
+            {
+                if (u.Equals(unit))
+                {
+                    continue;
+                }
+
+                int dx = x - u.x;
+                int dy = y - u.y;
+                double distance = Math.Sqrt(dx * dx + dy * dy);
+                if (u.team == unit.team)
+                { //distance from ally
+                    safetyScore += (distance == 0) ? 1 : (1 / distance);
+                }
+                else
+                { //distance from enemy
+                    safetyScore -= (distance == 0) ? 1 : (1 / distance);
+                }
+            }
+
+            //check queue for future action spreads that hit this tile
+            List<BattleAction> actions = GameBattle.queue.getActions(x, y, 20); //find all actions under 20 ctr
+            actions.ForEach(action => {
+                // "what if" the unit moved to the proposed x,y?
+                int damage = BattleAction.getDamage(action.actor, unit, action.actiondef);
+                if (damage > 0)
+                { //unit would be damaged
+                    safetyScore -= 1;
+                }
+                if (unit.hp - damage < 0)
+                { //unit would be killed
+                    safetyScore -= 2;
+                }
+                if (damage < 0)
+                { //unit would be healed
+                    safetyScore += 1;
+                }
+
+            });
+
+            return safetyScore;
+        }
+
         public static bool[,] createBinaryMap(int width, int height)
         {
             bool[,] binaryMap = new bool[width, height];
@@ -95,9 +143,10 @@ namespace BattleTest
             int[] xList = new int[] { 0, -1, 0, 1 };
             int[] yList = new int[] { -1, 0, 1, 0 };
             int min = 0, max = 0;
+            double minSafetyScore = 0, maxSafetyScore = 0;
 
             List<MoveNode> nodeList = new List<MoveNode>();
-            nodeList.Add(new MoveNode(unit.x, unit.y, 0, null));
+            nodeList.Add(new MoveNode(unit.x, unit.y, 0, null, getTileSafetyScore(units, unit, unit.x, unit.y)));
 
             while (i < nodeList.Count)
             {
@@ -127,7 +176,7 @@ namespace BattleTest
 
                     var mapUnit = tiles[x, y].getFirstUnit();
 
-                    //filter our enemy units
+                    //filter out enemy units
                     if (filtered)
                     {
                         //if unit exists on node and is enemy
@@ -141,9 +190,13 @@ namespace BattleTest
                         }
                     }
 
-                    min = steps < min ? steps : min;
-                    max = steps > max ? steps : max;
-                    nodeList.Add(new MoveNode(x, y, steps, nodeList[i]));
+                    double safetyScore = getTileSafetyScore(units, unit, x, y);
+                    minSafetyScore = safetyScore < minSafetyScore ? safetyScore : minSafetyScore;
+                    maxSafetyScore = safetyScore > maxSafetyScore ? safetyScore : maxSafetyScore;
+
+                    //min = steps < min ? steps : min;
+                    //max = steps > max ? steps : max;
+                    nodeList.Add(new MoveNode(x, y, steps, nodeList[i], safetyScore));
 
                     binaryMap[x,y] = true; //visit node
                 }
@@ -170,11 +223,10 @@ namespace BattleTest
                 }).ToList();
             }
 
-            /*
-            nodeList.forEach(function(node) {
-                node.stepScore = (node.steps - min) / (max - min);
+            //normalize safety scores
+            nodeList.ForEach(node => {
+                node.SafetyScore = (node.SafetyScore - minSafetyScore) / (maxSafetyScore - minSafetyScore);
             });
-            */
 
             return nodeList;
         }

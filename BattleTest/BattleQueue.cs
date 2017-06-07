@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BattleTest
 {
@@ -24,11 +22,18 @@ namespace BattleTest
 
             sort();
 
-            list.ForEach(item => item.tick());
-
             if (list[0].Ready)
             {
                 return list[0];
+            }
+            else
+            {
+                list.ForEach(item => item.tick());
+
+                if (list[0].Ready)
+                {
+                    return list[0];
+                }
             }
 
             return null;
@@ -47,19 +52,15 @@ namespace BattleTest
 
         public void draw(Graphics g)
         {
-            /*
-            this.list.forEach(function(item) {
-                if (item instanceof BattleAction) {
-                    item.spread.forEach(function(s) {
-                        ctx.fillStyle = "rgba(255, 0, 255, 1.0)";
-                        ctx.fillRect(s.x * TILE_WIDTH, s.y * TILE_HEIGHT, TILE_WIDTH - 1, TILE_HEIGHT - 1);
-                        ctx.fillStyle = "rgba(255,255,255,1.0)";
-                        ctx.font = "16px Arial";
-                        ctx.fillText(item.ctr, s.x * TILE_WIDTH + 16, s.y * TILE_WIDTH + 16);
-                    });
+            list.ForEach(item => {
+                if (item.GetType() == typeof(BattleMove))
+                {
+                    item.draw(g);
+                }
+                if (item.GetType() == typeof(BattleAction)) {
+                    item.draw(g);
                 }
             });
-            */
         }
 
         public List<BattleAction> getActions(int x, int y, int ctr)
@@ -74,5 +75,9 @@ namespace BattleTest
             return outputText;
         }
 
+        public static int calculateCTR(int CT, int speed)
+        {
+            return (int) Math.Ceiling((double)CT / speed);
+        }
     }
 }

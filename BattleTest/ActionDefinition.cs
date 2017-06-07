@@ -10,6 +10,7 @@ namespace BattleTest
     class ActionDefinition
     {
         public string name;
+        public int speed;
         public int range;
         public List<Point> spread;
 
@@ -19,6 +20,7 @@ namespace BattleTest
             {
                 ActionDefinition melee = new ActionDefinition();
                 melee.name = "Melee";
+                melee.speed = 10;
                 melee.range = 3;
                 melee.spread = new List<Point>();
                 melee.spread.Add(new Point(-1, 0));

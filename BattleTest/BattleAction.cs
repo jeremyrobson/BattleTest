@@ -2,18 +2,18 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BattleTest
 {
     class BattleAction : IQueueable, IComparable<BattleAction>
     {
         public BattleUnit actor;
-        //public int range;
+        public List<Point> diamond;
         public List<Point> spread;
+        public List<MoveNode> mapNodes;
         public int targetX;
         public int targetY;
+        //public List<MoveNode> nodeList;
         public MoveNode node;
         public double score;
         public double distance;
@@ -22,14 +22,22 @@ namespace BattleTest
 
         public bool Ready { get; set; }
         public bool Remove { get; set; }
+        public bool Done { get; set; }
         public int CT { get; set; }
         public int CTR { get; set; }
         public int Priority { get; set; }
+        public int Speed { get; set; }
+
+        static Brush rangeBrush;
+        static Brush spreadBrush;
 
         public BattleAction(BattleUnit actor)
         {
             this.actor = actor;
-            Priority = 1;
+            Priority = 0;
+
+            rangeBrush = new SolidBrush(Color.FromArgb(255, 255, 0, 0));
+            spreadBrush = new SolidBrush(Color.FromArgb(255, 0, 255, 0));
         }
 
         public void tick()
@@ -55,7 +63,7 @@ namespace BattleTest
             List<ITargetable> targets = new List<ITargetable>();
 
             spread.ForEach(s => {
-                ITargetable target = map.getTileUnits(s.X, s.Y)[0];
+                ITargetable target = map.getFirstTileUnit(s.X, s.Y);
                 if (target != null)
                 {
                     targets.Add(target);
@@ -72,9 +80,9 @@ namespace BattleTest
 
         public void done()
         {
+            Done = true;
             Remove = true;
             actor.action = null;
-            actor.acted = true;
         }
 
         public bool mustMoveFirst()
@@ -84,6 +92,26 @@ namespace BattleTest
 
         public void draw(Graphics g)
         {
+            /*
+            if (diamond != null)
+            {
+                diamond.ForEach(point => g.FillRectangle(
+                    rangeBrush,
+                    point.X * GameBattle.TILE_WIDTH,
+                    point.Y * GameBattle.TILE_HEIGHT,
+                    GameBattle.TILE_WIDTH,
+                    GameBattle.TILE_HEIGHT
+                ));
+            }
+            */
+            
+            spread.ForEach(point => g.FillRectangle(
+                spreadBrush,
+                point.X * GameBattle.TILE_WIDTH,
+                point.Y * GameBattle.TILE_HEIGHT,
+                GameBattle.TILE_WIDTH,
+                GameBattle.TILE_HEIGHT
+            ));
 
         }
 
@@ -96,10 +124,11 @@ namespace BattleTest
             return 0; //this should never happen
         }
 
+        //sort DESC
         public int CompareTo(BattleAction action)
         {
-            if (score < action.score) return -1;
-            if (score > action.score) return 1;
+            if (score < action.score) return 1;
+            if (score > action.score) return -1;
             return 0;
         }
 
@@ -180,11 +209,17 @@ namespace BattleTest
             List<BattleAction> coverage = new List<BattleAction>();
             coverage.Add(getDefaultAction(unit));
 
-            List<MoveNode> mapNodes = BattleMap.getMapNodes(map.tiles, GameBattle.MAP_WIDTH, GameBattle.MAP_HEIGHT, units, unit, -999); //list of possible move nodes
-
-            mapNodes = mapNodes.Where(node => node.steps <= unit.moveLimit).ToList();
-
-            GameBattle.mapNodes = mapNodes;
+            List<MoveNode> mapNodes = new List<MoveNode>();
+            
+            if (unit.moved)
+            {
+                mapNodes.Add(new MoveNode(unit.x, unit.y, 0, null));
+            }
+            else
+            {
+                mapNodes = BattleMap.getMapNodes(map.tiles, GameBattle.MAP_WIDTH, GameBattle.MAP_HEIGHT, units, unit, -999); //list of possible move nodes
+                mapNodes = mapNodes.Where(node => node.steps <= unit.moveLimit).ToList();
+            }
 
             unit.jobclass.actions.ForEach(actiondef => {
                 mapNodes.ForEach(node => {
@@ -208,11 +243,23 @@ namespace BattleTest
 
                                 if (x == node.x && y == node.y) //is this where the actor is moving to?
                                 { 
-                                    target = unit; //then he hits himself
+                                    target = unit; //then he will hit himself
                                 }
                                 else
                                 {
                                     target = map.getFirstTileUnit(x, y); //get the unit at target node
+
+                                    //if target is actor but actor will move before it hits
+                                    if (target != null && unit.Equals(target) && (node.x != unit.x || node.y != unit.y))
+                                    {
+                                        target = null; //ignore actor
+                                    }
+
+                                    //if action will be invoked after target's turn
+                                    if (target != null && target.CTR > BattleQueue.calculateCTR(100, actiondef.speed))
+                                    {
+                                        //target = null; //ignore target
+                                    }
                                 }
 
                                 if (target != null)
@@ -230,10 +277,11 @@ namespace BattleTest
                             return;
                         }
 
+                        totalScore += node.SafetyScore;
+
                         int dx = d.X - node.x;
                         int dy = d.Y - node.y;
-                        double distance = Math.Sqrt(dx * dx + dy * dy); //distance from action node to move node
-
+                        double distance = Math.Sqrt(dx * dx + dy * dy); //distance from action node to move node                        
                         totalScore += distance; //todo: for ranged attacks higher is better, for ranged buffs lower is better
 
                         BattleAction battleAction = new BattleAction(unit);
@@ -245,6 +293,8 @@ namespace BattleTest
                         battleAction.damage = totalDamage;
                         battleAction.score = totalScore;
                         battleAction.spread = newspread;
+                        battleAction.mapNodes = mapNodes;
+                        battleAction.diamond = diamond;
 
                         coverage.Add(battleAction);
 

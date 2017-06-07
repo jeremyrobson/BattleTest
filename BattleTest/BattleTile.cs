@@ -26,7 +26,7 @@ namespace BattleTest
 
             if (type == "grass")
             {
-                brush = Brushes.LawnGreen;
+                brush = Brushes.DarkOliveGreen;
             }
             else
             {
