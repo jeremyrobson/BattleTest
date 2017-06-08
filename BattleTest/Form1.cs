@@ -29,7 +29,7 @@ namespace BattleTest
 
             timer = new Timer();
             timer.Tick += new EventHandler(loop);
-            timer.Interval = 500;
+            timer.Interval = 1000;
             timer.Enabled = true;
         }
 

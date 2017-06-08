@@ -20,6 +20,7 @@ namespace BattleTest
         public int damage;
         public ActionDefinition actiondef;
 
+        public int ID { get; set; }
         public bool Ready { get; set; }
         public bool Remove { get; set; }
         public bool Done { get; set; }
@@ -31,10 +32,13 @@ namespace BattleTest
         static Brush rangeBrush;
         static Brush spreadBrush;
 
-        public BattleAction(BattleUnit actor)
+        public BattleAction(BattleUnit actor, ActionDefinition actiondef)
         {
             this.actor = actor;
-            Priority = 0;
+            this.actiondef = actiondef;
+            CTR = BattleQueue.calculateCTR(100, actiondef.speed);
+            Priority = 1;
+            ID = GameBattle.generateID();
 
             rangeBrush = new SolidBrush(Color.FromArgb(255, 255, 0, 0));
             spreadBrush = new SolidBrush(Color.FromArgb(255, 0, 255, 0));
@@ -193,10 +197,9 @@ namespace BattleTest
 
         public static BattleAction getDefaultAction(BattleUnit actor)
         {
-            BattleAction defaultAction = new BattleAction(actor);
+            BattleAction defaultAction = new BattleAction(actor, ActionDefinition.nothing);
 
             defaultAction.node = new MoveNode(actor.x, actor.y, 0, null);
-            defaultAction.actiondef = ActionDefinition.nothing;
             defaultAction.spread = new List<Point>();
 
             return defaultAction;
@@ -217,7 +220,7 @@ namespace BattleTest
             }
             else
             {
-                mapNodes = BattleMap.getMapNodes(map.tiles, GameBattle.MAP_WIDTH, GameBattle.MAP_HEIGHT, units, unit, -999); //list of possible move nodes
+                mapNodes = BattleMap.getMapNodes(map.tiles, GameBattle.MAP_WIDTH, GameBattle.MAP_HEIGHT, units, unit, -999, true); //list of possible move nodes
                 mapNodes = mapNodes.Where(node => node.steps <= unit.moveLimit).ToList();
             }
 
@@ -228,6 +231,7 @@ namespace BattleTest
                         List<Point> newspread = new List<Point>();
                         int totalDamage = 0;
                         double totalScore = 0;
+                        int CTR = BattleQueue.calculateCTR(100, actiondef.speed);
 
                         actiondef.spread.ForEach(s => {
                             int x = s.X + d.X;
@@ -256,7 +260,7 @@ namespace BattleTest
                                     }
 
                                     //if action will be invoked after target's turn
-                                    if (target != null && target.CTR > BattleQueue.calculateCTR(100, actiondef.speed))
+                                    if (target != null && target.CTR > CTR)
                                     {
                                         //target = null; //ignore target
                                     }
@@ -284,8 +288,7 @@ namespace BattleTest
                         double distance = Math.Sqrt(dx * dx + dy * dy); //distance from action node to move node                        
                         totalScore += distance; //todo: for ranged attacks higher is better, for ranged buffs lower is better
 
-                        BattleAction battleAction = new BattleAction(unit);
-                        battleAction.actiondef = actiondef;
+                        BattleAction battleAction = new BattleAction(unit, actiondef);
                         battleAction.node = node;
                         battleAction.targetX = d.X;
                         battleAction.targetY = d.Y;

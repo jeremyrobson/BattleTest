@@ -15,28 +15,34 @@ namespace BattleTest
             list.AddRange(units);
         }
 
-        public IQueueable tick()
+        public void update()
+        {
+            if (!list[0].Ready || list[0].Done)
+            {
+                tick();
+            }
+        }
+
+        public void tick()
         {
             //filter items where Remove is true
             list = list.Where(item => !item.Remove).ToList();
 
             sort();
 
+            list.ForEach(item => item.tick());
+        }
+
+        public IQueueable getActiveItem()
+        {
             if (list[0].Ready)
             {
                 return list[0];
             }
             else
             {
-                list.ForEach(item => item.tick());
-
-                if (list[0].Ready)
-                {
-                    return list[0];
-                }
+                return null;
             }
-
-            return null;
         }
 
         public void add(IQueueable item)

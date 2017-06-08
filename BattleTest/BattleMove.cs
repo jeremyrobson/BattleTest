@@ -10,6 +10,7 @@ namespace BattleTest
         MoveNode node;
         List<MoveNode> path;
 
+        public int ID { get; set; }
         public bool Ready { get; set; }
         public bool Remove { get; set; }
         public bool Done { get; set; }
@@ -27,6 +28,7 @@ namespace BattleTest
             CTR = 0;
             Ready = true;
             Priority = 1;
+            ID = GameBattle.generateID();
 
             //restrict path to unit's move limit
             if (path.Count > unit.moveLimit)
@@ -57,7 +59,6 @@ namespace BattleTest
 
         public void done()
         {
-            unit.moved = true;
             Remove = true;
             Done = true;
         }

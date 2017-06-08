@@ -12,6 +12,7 @@ namespace BattleTest
         bool Remove { get; set; }
         bool Ready { get; set; }
         bool Done { get; set; }
+        int ID { get; set; }
         int Priority { get; set; }
         int CTR { get; set; }
         int CT { get; set; }

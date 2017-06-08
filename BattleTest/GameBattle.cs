@@ -43,21 +43,21 @@ namespace BattleTest
             consoleBuffer = "";
         }
 
+        public static int generateID()
+        {
+            return Guid.NewGuid().GetHashCode();
+        }
+
         public void update()
         {
+            activeItem = queue.getActiveItem();
+            
             if (activeItem != null)
             {
                 activeItem.invoke(map, units, queue);
+            }
 
-                if (activeItem.Done)
-                {
-                    activeItem = null;
-                }
-            }
-            else
-            {
-                activeItem = queue.tick();
-            }
+            queue.update();
 
             draw();
         }

@@ -12,7 +12,6 @@ namespace BattleTest
         static Random random;
 
         static int count;
-        public int id;
         public int x;
         public int y;
         public string name;
@@ -24,6 +23,7 @@ namespace BattleTest
         public string status;
         public JobClass jobclass;
 
+        public int ID { get; set; }
         public int CT { get; set; }
         public int CTR { get; set; }
         public int Priority { get; set; }
@@ -40,14 +40,12 @@ namespace BattleTest
 
         public BattleUnit(string name, string team, int x, int y)
         {
-            count++;
-
             if (random == null)
             {
                 random = new Random();
             }
 
-            id = count;
+            ID = GameBattle.generateID();
             this.name = name;
             sprite = name[0].ToString();
             this.team = team;
@@ -55,7 +53,7 @@ namespace BattleTest
             this.y = y;
 
             jobclass = JobClass.squire;
-            Speed = random.Next(3, 10);
+            Speed = 5; // random.Next(3, 10);
             Priority = 0;
             CTR = 0;
             CT = 100;
@@ -123,7 +121,7 @@ namespace BattleTest
                     {
                         queue.add(action);
                         acted = true;
-                        GameBattle.WriteLine(name + " queued an action.");
+                        GameBattle.WriteLine(name + " queued an action called " + action.actiondef.name);
                     }
                 }
             }
@@ -131,7 +129,7 @@ namespace BattleTest
             {
                 GameBattle.WriteLine("Moving to a safer location.");
 
-                List<MoveNode> mapNodes = BattleMap.getMapNodes(map.tiles, GameBattle.MAP_WIDTH, GameBattle.MAP_HEIGHT, units, this, moveLimit);
+                List<MoveNode> mapNodes = BattleMap.getMapNodes(map.tiles, GameBattle.MAP_WIDTH, GameBattle.MAP_HEIGHT, units, this, moveLimit, true);
 
                 mapNodes.Sort();
 
@@ -158,14 +156,14 @@ namespace BattleTest
                     action = coverage[0];
                     queue.add(action);
                     acted = true;
-                    GameBattle.WriteLine(name + " queued an action.");
+                    GameBattle.WriteLine(name + " queued an action called " + action.actiondef.name);
                 }
                 
                 done();
             }
             else
             {
-                //battle.queue.add(new DoNothing(battle, this));
+                GameBattle.WriteLine("This should never happen.");
                 done();
             }
         }
@@ -197,7 +195,7 @@ namespace BattleTest
 
         public void draw(Graphics g)
         {
-            if (action != null)
+            if (action != null && action.mapNodes != null)
             {
                 action.mapNodes.ForEach(node => node.draw(g));
             }
@@ -213,6 +211,8 @@ namespace BattleTest
             if (CTR > item.CTR) return 1;
             if (Priority > item.Priority) return -1;
             if (Priority < item.Priority) return 1;
+            if (ID < item.ID) return -1;
+            if (ID > item.ID) return 1;
             return 0; //this should never happen
         }
 
@@ -222,12 +222,12 @@ namespace BattleTest
             {
                 return false;
             }
-            return id == unit.id;
+            return ID == unit.ID;
         }
 
         public override string ToString()
         {
-            return "Unit " + name + " CTR: " + CTR;
+            return "Unit " + name + " CTR: " + CTR + " Moved: " + moved + " Acted:" + acted;
         }
     }
 }

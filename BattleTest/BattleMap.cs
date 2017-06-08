@@ -208,10 +208,10 @@ namespace BattleTest
             {
                 //remove occupied mapNodes UNLESS occupied by self
                 nodeList = nodeList.Where(node => {
-                    if (tiles[node.x,node.y].units.Count > 0)
-                    { //if there are units
-                        if (tiles[node.x,node.y].units[0].id == unit.id)
-                        { //if unit is self
+                    if (tiles[node.x,node.y].units.Count > 0) //if there are units
+                    {
+                        if (tiles[node.x,node.y].units[0].Equals(unit)) //if unit is self
+                        {
                             return true; //node is valid
                         }
                     }

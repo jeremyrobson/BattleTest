@@ -24,6 +24,10 @@ namespace BattleTest
             {
                 safetyScore = value;
                 int r = (int)(safetyScore * 255);
+                if (r < 0)
+                {
+                    r = 0;
+                }
                 moveBrush = new SolidBrush(Color.FromArgb(200, r, 0, 255-r));
             }
         }
