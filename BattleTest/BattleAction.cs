@@ -10,7 +10,7 @@ namespace BattleTest
         public BattleUnit actor;
         public List<Point> diamond;
         public List<Point> spread;
-        public List<MoveNode> mapNodes;
+        public List<MoveNode> moveNodes;
         public int targetX;
         public int targetY;
         //public List<MoveNode> nodeList;
@@ -40,7 +40,7 @@ namespace BattleTest
             Priority = 1;
             ID = GameBattle.generateID();
 
-            rangeBrush = new SolidBrush(Color.FromArgb(255, 255, 0, 0));
+            //rangeBrush = new SolidBrush(Color.FromArgb(255, 255, 0, 0));
             spreadBrush = new SolidBrush(Color.FromArgb(255, 0, 255, 0));
         }
 
@@ -212,20 +212,20 @@ namespace BattleTest
             List<BattleAction> coverage = new List<BattleAction>();
             coverage.Add(getDefaultAction(unit));
 
-            List<MoveNode> mapNodes = new List<MoveNode>();
+            List<MoveNode> moveNodes = new List<MoveNode>();
             
             if (unit.moved)
             {
-                mapNodes.Add(new MoveNode(unit.x, unit.y, 0, null));
+                moveNodes.Add(new MoveNode(unit.x, unit.y, 0, null));
             }
             else
             {
-                mapNodes = BattleMap.getMapNodes(map.tiles, GameBattle.MAP_WIDTH, GameBattle.MAP_HEIGHT, units, unit, -999, true); //list of possible move nodes
-                mapNodes = mapNodes.Where(node => node.steps <= unit.moveLimit).ToList();
+                moveNodes = BattleMap.getMoveNodes(map.tiles, GameBattle.MAP_WIDTH, GameBattle.MAP_HEIGHT, units, unit, -999, true); //list of possible move nodes
+                moveNodes = moveNodes.Where(node => node.steps <= unit.moveLimit).ToList();
             }
 
             unit.jobclass.actions.ForEach(actiondef => {
-                mapNodes.ForEach(node => {
+                moveNodes.ForEach(node => {
                     var diamond = createDiamond(node.x, node.y, actiondef.range, GameBattle.MAP_WIDTH, GameBattle.MAP_HEIGHT, false); //list of possible action nodes
                     diamond.ForEach(d => {
                         List<Point> newspread = new List<Point>();
@@ -296,7 +296,7 @@ namespace BattleTest
                         battleAction.damage = totalDamage;
                         battleAction.score = totalScore;
                         battleAction.spread = newspread;
-                        battleAction.mapNodes = mapNodes;
+                        battleAction.moveNodes = moveNodes;
                         battleAction.diamond = diamond;
 
                         coverage.Add(battleAction);

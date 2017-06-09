@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BattleTest
 {
@@ -11,13 +9,13 @@ namespace BattleTest
     {
         static Random random;
 
-        static int count;
         public int x;
         public int y;
         public string name;
         public string team;
         public string sprite;
         public BattleAction action;
+        public BattleMove move; //todo: figure out if this is needed for anything
         public int moveLimit = 3;
         public int hp;
         public string status;
@@ -51,6 +49,8 @@ namespace BattleTest
             this.team = team;
             this.x = x;
             this.y = y;
+            hp = 100;
+            status = "alive";
 
             jobclass = JobClass.squire;
             Speed = 5; // random.Next(3, 10);
@@ -113,7 +113,8 @@ namespace BattleTest
                     //if action requires move
                     if (action.node.x != x || action.node.y != y)
                     {
-                        queue.add(new BattleMove(this, action.node));
+                        move = new BattleMove(this, action.node, action.moveNodes);
+                        queue.add(move);
                         moved = true;
                         action = null; //will get new action after move is completed
                     }
@@ -129,13 +130,13 @@ namespace BattleTest
             {
                 GameBattle.WriteLine("Moving to a safer location.");
 
-                List<MoveNode> mapNodes = BattleMap.getMapNodes(map.tiles, GameBattle.MAP_WIDTH, GameBattle.MAP_HEIGHT, units, this, moveLimit, true);
+                List<MoveNode> moveNodes = BattleMap.getMoveNodes(map.tiles, GameBattle.MAP_WIDTH, GameBattle.MAP_HEIGHT, units, this, moveLimit, true);
 
-                mapNodes.Sort();
+                moveNodes.Sort();
 
-                MoveNode newNode = mapNodes[0];
-
-                queue.add(new BattleMove(this, newNode));
+                MoveNode newNode = moveNodes[0];
+                move = new BattleMove(this, newNode, action.moveNodes);
+                queue.add(move);
 
                 //only counts as move if actually moved
                 if (newNode.x != x || newNode.y != y)
@@ -195,11 +196,6 @@ namespace BattleTest
 
         public void draw(Graphics g)
         {
-            if (action != null && action.mapNodes != null)
-            {
-                action.mapNodes.ForEach(node => node.draw(g));
-            }
-
             float dx = GameBattle.TILE_WIDTH * x;
             float dy = GameBattle.TILE_HEIGHT * y;
             g.DrawString(sprite, font, brush, dx, dy);

@@ -23,12 +23,12 @@ namespace BattleTest
             set
             {
                 safetyScore = value;
-                int r = (int)(safetyScore * 255);
-                if (r < 0)
+                int b = (int)(safetyScore * 10);
+                if (b < 0)
                 {
-                    r = 0;
+                    b = 0;
                 }
-                moveBrush = new SolidBrush(Color.FromArgb(200, r, 0, 255-r));
+                moveBrush = brushes[b];
             }
         }
 
@@ -66,7 +66,6 @@ namespace BattleTest
 
         public void draw(Graphics g)
         {
-            moveBrush = brushes[(int)(safetyScore * 10)];
             g.FillRectangle(moveBrush, rect);
             g.DrawRectangle(pen, rect);
         }

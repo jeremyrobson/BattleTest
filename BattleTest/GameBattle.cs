@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BattleTest
@@ -14,7 +15,9 @@ namespace BattleTest
         public const int TILE_WIDTH = 32;
         public const int TILE_HEIGHT = 32;
 
-        BufferedGraphics bg;
+        static Timer timer;
+
+        public static GameBattle gameBattle;
         public static BattleQueue queue;
         BattleMap map;
         List<BattleUnit> units;
@@ -22,14 +25,8 @@ namespace BattleTest
         public static string consoleBuffer { get; set; }
         public static int consoleCount;
 
-        //public static List<MoveNode> mapNodes;
-        //public static BattleMove battleMove;
-        //public static BattleAction battleAction;
-
-        public GameBattle(BufferedGraphics bg)
+        public GameBattle()
         {
-            this.bg = bg;
-
             map = new BattleMap(MAP_WIDTH, MAP_HEIGHT);
 
             units = new List<BattleUnit>();
@@ -41,6 +38,12 @@ namespace BattleTest
             queue = new BattleQueue(units);
 
             consoleBuffer = "";
+        }
+
+        public static void start()
+        {
+            gameBattle = new GameBattle();
+            timer = new Timer(_ => gameBattle.update(), null, 0, 1000);
         }
 
         public static int generateID()
@@ -58,36 +61,6 @@ namespace BattleTest
             }
 
             queue.update();
-
-            draw();
-        }
-
-        public void draw()
-        {
-            map.draw(bg.Graphics);
-
-            /*
-            if (mapNodes != null)
-            {
-                mapNodes.ForEach(node => node.draw(bg.Graphics));
-            }
-
-            if (battleMove != null)
-            {
-                battleMove.draw(bg.Graphics);
-            }
-
-            if (battleAction != null)
-            {
-                battleAction.draw(bg.Graphics);
-            }
-            */
-
-            queue.draw(bg.Graphics);
-
-            units.ForEach(unit => unit.draw(bg.Graphics));
-
-            bg.Render();
         }
 
         public static bool listHasPoint(List<Point> list, int x, int y)
@@ -95,7 +68,7 @@ namespace BattleTest
             return list.Any(item => item.X == x && item.Y == y);
         }
 
-        public override string ToString()
+        public static string getQueue()
         {
             return queue.ToString();
         }
@@ -111,6 +84,46 @@ namespace BattleTest
             string text = consoleBuffer;
             consoleBuffer = "";
             return text;
+        }
+
+        public static BattleUnit getActiveUnit()
+        {
+            BattleUnit unit = null;
+
+            IQueueable activeItem = queue.getActiveItem();
+            if (activeItem != null)
+            {
+                if (activeItem.GetType() == typeof(BattleUnit))
+                {
+                    unit = (BattleUnit)activeItem;
+                }
+            }
+
+            return unit;
+        }
+
+        public static List<BattleUnit> getUnits()
+        {
+            return gameBattle.units;
+        }
+
+        public static BattleTile[,] getTiles()
+        {
+            return gameBattle.map.tiles;
+        }
+
+        public static List<MoveNode> getMoveNodes()
+        {
+            BattleUnit unit = getActiveUnit();
+
+            if (unit != null && unit.action != null && unit.action.moveNodes != null)
+            {
+                return unit.action.moveNodes;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ namespace BattleTest
         BattleUnit unit;
         MoveNode node;
         List<MoveNode> path;
+        public List<MoveNode> moveNodes;
 
         public int ID { get; set; }
         public bool Ready { get; set; }
@@ -19,10 +20,11 @@ namespace BattleTest
         public int Priority { get; set; }
         public int Speed { get; set; }
 
-        public BattleMove(BattleUnit unit, MoveNode node)
+        public BattleMove(BattleUnit unit, MoveNode node, List<MoveNode> moveNodes)
         {
             this.unit = unit;
             this.node = node;
+            this.moveNodes = moveNodes;
 
             path = BattleMap.getPath(node);
             CTR = 0;

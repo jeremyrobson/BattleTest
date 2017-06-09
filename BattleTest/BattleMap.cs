@@ -134,7 +134,7 @@ namespace BattleTest
             return binaryMap;
         }
 
-        public static List<MoveNode> getMapNodes(BattleTile[,] tiles, int width, int height, List<BattleUnit> units, BattleUnit unit, int maxSteps, bool filtered = false)
+        public static List<MoveNode> getMoveNodes(BattleTile[,] tiles, int width, int height, List<BattleUnit> units, BattleUnit unit, int maxSteps, bool filtered = false)
         {
             var binaryMap = createBinaryMap(width, height);
             binaryMap[unit.x, unit.y] = true; //visit starting node
