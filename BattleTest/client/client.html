@@ -1,0 +1,237 @@
+<!doctype html>
+<html>
+<head>
+
+<script>
+    const MAP_WIDTH = 16;
+    const MAP_HEIGHT = 16;
+    const TILE_WIDTH = 30;
+    const TILE_HEIGHT = 30;
+</script>
+<script src="battle.js"></script>
+<script>
+var canvas, context;
+var tileColors = {"water": "rgb(55,0,55)", "grass":"rgb(55,55,0)"};
+var teamColors = ["rgb(255,0,0)", "rgb(0,255,0)"];
+var tiles, units;
+var tileX = 0, tileY = 0;
+var selunit, rangelist, movelist;
+var seltile, spreadlist, targetlist;
+
+function create_unit(i) {
+    return {
+        "id": i,
+        "name": i,
+        "team": Math.floor(i/5),
+        "x": Math.floor(Math.random() * MAP_WIDTH),
+        "y": Math.floor(Math.random() * MAP_HEIGHT),
+    };
+}
+
+function get_unit(x, y) {
+    return tiles[x][y].units[0];
+}
+
+function select_unit(x, y) {
+    movelist = null;
+    selunit = get_unit(x, y);
+}
+
+function select_action_tile(x, y) {
+    seltile = {
+        "x": x,
+        "y": y
+    };
+    spreadlist = [{x:x-1,y:y},{x:x+1,y:y},{x:x,y:y-1},{x:x,y:y+1}];
+    targetlist = [];
+    spreadlist.forEach(function(s) {
+        var target = get_unit(s.x, s.y);
+        if (target) {
+            targetlist.push(target);
+        }
+    });
+    console.log(targetlist);
+    console.log("score", get_score(selunit, targetlist));
+}
+
+function get_damage(actor, target) {
+    return Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6);
+}
+
+function get_score(actor, targetlist) {
+    var score = 0;
+
+    targetlist.forEach(function(t) {
+        var damage = get_damage(actor, t);
+        if (t.team == actor.team) {
+            score -= damage;
+        }
+        else {
+            score += damage;
+        }
+    });
+
+    return score;
+}
+
+function containsPoint(list, x, y) {
+    return typeof(list.find(function(node) {
+        return node.x === x && node.y === y;
+    })) === "object";
+}
+
+function select_move_tile(x, y) {
+    console.log(x, y);
+    if (containsPoint(movelist, x, y)) {
+        tiles[x][y].units.filter(function(u) {
+            return u.id != selunit.id;
+        });
+        selunit.x = x;
+        selunit.y = y;
+        tiles[x][y].units.push(selunit);
+    }
+}
+
+function action() {
+    if (selunit) {
+        movelist = null;
+        rangelist = createDiamond(selunit.x, selunit.y, 5, false);
+    }
+}
+
+function move() {
+    if (selunit) {
+        rangelist = null;
+        spreadlist = null;
+        movelist = getMoveNodes(tiles, units, selunit, -999, true);
+    }
+}
+
+function cancel() {
+    selunit = null;
+    rangelist = null;
+    spreadlist = null;
+    movelist = null;
+}
+
+function mouse_move(x, y) {
+    tileX = Math.floor(x / TILE_WIDTH);
+    tileY = Math.floor(y / TILE_HEIGHT);
+}
+
+function mouse_down(x, y) {
+    mouse_move(x, y);
+
+    if (selunit && rangelist) {
+        select_action_tile(tileX, tileY);
+    }
+    else if (selunit && movelist) {
+        select_move_tile(tileX, tileY);
+    }
+    else {
+        cancel();
+        select_unit(tileX, tileY);
+    }
+}
+
+function update() {
+
+    draw();
+    window.requestAnimationFrame(update);
+}
+
+function draw() {
+    context.clearRect(0, 0, 640, 480);
+
+    for (var x=0; x<MAP_WIDTH; x++) {
+        for (var y=0; y<MAP_HEIGHT; y++) {
+            context.fillStyle = tileColors[tiles[x][y].type];
+            context.fillRect(x*TILE_WIDTH,y*TILE_HEIGHT,TILE_WIDTH,TILE_HEIGHT);
+        }
+    }
+
+    movelist && movelist.forEach(function(m) {
+        context.fillStyle = brushes[Math.floor(m.safetyScore * (brushes.length - 1))];
+        context.fillRect(m.x * TILE_WIDTH, m.y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+        context.font = "16px Arial";
+        //context.fillStyle = "rgb(255,255,0)";
+        //context.fillText(m.steps, m.x * TILE_WIDTH, m.y * TILE_HEIGHT);
+    });
+
+    rangelist && rangelist.forEach(function(r) {
+        context.fillStyle = "rgba(0,255,255,0.5";
+        context.fillRect(r.x * TILE_WIDTH, r.y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+    });
+
+    spreadlist && spreadlist.forEach(function(s) {
+        context.fillStyle = "rgba(255,255,0,0.5";
+        context.fillRect(s.x * TILE_WIDTH, s.y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+    });
+
+    context.strokeStyle = "rgba(255,255,0,0.5)";
+    context.lineWidth = 2;
+    context.strokeRect(tileX * TILE_WIDTH, tileY * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+
+    units.forEach(function(u) {
+        if (selunit && u.id === selunit.id) {
+            context.save();
+            context.shadowColor = "#ffffff";
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
+            context.shadowBlur = 10;
+        }
+
+        context.textBaseline = "top";
+        context.font = "24px Arial";
+        context.fillStyle = teamColors[u.team];
+        context.fillText(u.name, u.x * TILE_WIDTH, u.y * TILE_HEIGHT);
+
+        context.shadowBlur = 0;
+    });
+
+}
+
+window.onload = function() {
+    canvas = document.getElementById("canvas");
+    context = canvas.getContext("2d");
+
+    canvas.onmousemove = function(e) {
+        mouse_move(e.offsetX, e.offsetY);
+    };
+    canvas.onmousedown = function(e) {
+        mouse_down(e.offsetX, e.offsetY);
+    }
+
+    tiles = [];
+    for (var x=0; x<MAP_WIDTH; x++) {
+        tiles[x] = [];
+        for (var y=0; y<MAP_HEIGHT; y++) {
+            tiles[x][y] = {
+                type: "grass", //["water","grass"][Math.floor(Math.random() * 2)],
+                units: []
+            }
+        }
+    }
+
+    units = [];
+    for (var i=0; i<10; i++) {
+        var newunit = create_unit(i);
+        units.push(newunit);
+        tiles[newunit.x][newunit.y].units.push(newunit);
+    }
+
+    update();
+};
+
+</script>
+
+</head>
+<body>
+
+<canvas id="canvas" width="640" height="480"></canvas>
+<button id="button-move" onclick="move();">move</button>
+<button id="button-action" onclick="action();">action</button>
+<button id="button-cancel" onclick="cancel();">cancel</button>
+
+</body>
+</html>

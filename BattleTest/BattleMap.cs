@@ -143,10 +143,13 @@ namespace BattleTest
             int[] xList = new int[] { 0, -1, 0, 1 };
             int[] yList = new int[] { -1, 0, 1, 0 };
             int min = 0, max = 0;
-            double minSafetyScore = 0, maxSafetyScore = 0;
+
+            double initialSafetyScore = getTileSafetyScore(units, unit, unit.x, unit.y);
+            double minSafetyScore = initialSafetyScore;
+            double maxSafetyScore = initialSafetyScore;
 
             List<MoveNode> nodeList = new List<MoveNode>();
-            nodeList.Add(new MoveNode(unit.x, unit.y, 0, null, getTileSafetyScore(units, unit, unit.x, unit.y)));
+            nodeList.Add(new MoveNode(unit.x, unit.y, 0, null, initialSafetyScore));
 
             while (i < nodeList.Count)
             {
