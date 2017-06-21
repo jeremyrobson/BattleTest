@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace BattleTest
 {
-    class BattleMove : IQueueable
+    public class BattleMove : IQueueable
     {
         BattleUnit unit;
         MoveNode node;

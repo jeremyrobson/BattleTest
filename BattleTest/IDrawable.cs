@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BattleTest
 {
-    interface IDrawable
+    public interface IDrawable
     {
         void draw(Graphics g);
     }

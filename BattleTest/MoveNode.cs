@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 namespace BattleTest
 {
-    class MoveNode : IComparable<MoveNode>
+    public class MoveNode : IComparable<MoveNode>
     {
         public int x, y, steps;
         public MoveNode parent;
@@ -23,7 +23,7 @@ namespace BattleTest
             set
             {
                 safetyScore = value;
-                int b = (int)(safetyScore * 10);
+                int b = (int)(safetyScore * (brushes.Count - 1));
                 if (b < 0)
                 {
                     b = 0;
@@ -46,6 +46,7 @@ namespace BattleTest
 
             //gradient from red to yellow to green
             brushes = new List<Brush>();
+            brushes.Add(new SolidBrush(Color.FromArgb(255, 255, 0, 0)));
             brushes.Add(new SolidBrush(Color.FromArgb(255, 255, 0, 55)));
             brushes.Add(new SolidBrush(Color.FromArgb(255, 255, 0, 100)));
             brushes.Add(new SolidBrush(Color.FromArgb(255, 255, 0, 155)));
@@ -56,7 +57,7 @@ namespace BattleTest
             brushes.Add(new SolidBrush(Color.FromArgb(255, 100, 0, 255)));
             brushes.Add(new SolidBrush(Color.FromArgb(255, 55, 0, 255)));
             brushes.Add(new SolidBrush(Color.FromArgb(255, 0, 0, 255)));
-            brushes.Add(new SolidBrush(Color.FromArgb(255, 0, 0, 255)));
+            brushes.Add(new SolidBrush(Color.FromArgb(255, 0, 0, 255))); //extra
         }
 
         public bool equals(int x, int y)

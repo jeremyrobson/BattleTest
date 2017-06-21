@@ -5,14 +5,12 @@ using System.Linq;
 
 namespace BattleTest
 {
-    class BattleAction : IQueueable, IComparable<BattleAction>
+    public class BattleAction : IQueueable, IComparable<BattleAction>
     {
         public BattleUnit actor;
         public List<Point> diamond;
-        public List<Point> spread;
         public List<MoveNode> moveNodes;
-        public int targetX;
-        public int targetY;
+        public ITargetable target;
         //public List<MoveNode> nodeList;
         public MoveNode node;
         public double score;
@@ -31,6 +29,25 @@ namespace BattleTest
 
         static Brush rangeBrush;
         static Brush spreadBrush;
+
+        //spread depends on where target is
+        public List<Point> Spread
+        {
+            get
+            {
+                List<Point> spread = new List<Point>();
+                actiondef.spread.ForEach(p =>
+                {
+                    spread.Add(new Point(p.X + target.X, p.Y + target.Y));
+                });
+                return spread;
+            }
+
+            set
+            {
+                Spread = value; 
+            }
+        }
 
         public BattleAction(BattleUnit actor, ActionDefinition actiondef)
         {
@@ -66,7 +83,7 @@ namespace BattleTest
         {
             List<ITargetable> targets = new List<ITargetable>();
 
-            spread.ForEach(s => {
+            Spread.ForEach(s => {
                 ITargetable target = map.getFirstTileUnit(s.X, s.Y);
                 if (target != null)
                 {
@@ -91,7 +108,7 @@ namespace BattleTest
 
         public bool mustMoveFirst()
         {
-            return (!(actor.x == node.x && actor.y == node.y));
+            return (!(actor.X == node.x && actor.Y == node.y));
         }
 
         public void draw(Graphics g)
@@ -109,7 +126,7 @@ namespace BattleTest
             }
             */
             
-            spread.ForEach(point => g.FillRectangle(
+            Spread.ForEach(point => g.FillRectangle(
                 spreadBrush,
                 point.X * GameBattle.TILE_WIDTH,
                 point.Y * GameBattle.TILE_HEIGHT,
@@ -138,7 +155,7 @@ namespace BattleTest
 
         public override string ToString()
         {
-            return "Action - " + actor.sprite + " - CTR: " + CTR + ", Node: " + targetX + ", " + targetY;
+            return "Action - " + actor.sprite + " - CTR: " + CTR + ", Node: " + target.X + ", " + target.Y;
         }
 
         public static List<Point> createDiamond(int x, int y, int range, int maxWidth, int maxHeight, bool includeCenter)
@@ -199,8 +216,8 @@ namespace BattleTest
         {
             BattleAction defaultAction = new BattleAction(actor, ActionDefinition.nothing);
 
-            defaultAction.node = new MoveNode(actor.x, actor.y, 0, null);
-            defaultAction.spread = new List<Point>();
+            defaultAction.node = new MoveNode(actor.X, actor.Y, 0, null);
+            defaultAction.Spread = new List<Point>();
 
             return defaultAction;
         }
@@ -216,7 +233,7 @@ namespace BattleTest
             
             if (unit.moved)
             {
-                moveNodes.Add(new MoveNode(unit.x, unit.y, 0, null));
+                moveNodes.Add(new MoveNode(unit.X, unit.Y, 0, null));
             }
             else
             {
@@ -254,7 +271,7 @@ namespace BattleTest
                                     target = map.getFirstTileUnit(x, y); //get the unit at target node
 
                                     //if target is actor but actor will move before it hits
-                                    if (target != null && unit.Equals(target) && (node.x != unit.x || node.y != unit.y))
+                                    if (target != null && unit.Equals(target) && (node.x != unit.X || node.y != unit.Y))
                                     {
                                         target = null; //ignore actor
                                     }
@@ -263,6 +280,14 @@ namespace BattleTest
                                     if (target != null && target.CTR > CTR)
                                     {
                                         //target = null; //ignore target
+                                    }
+
+                                    //if target is to be killed before action is invoked, ignore target
+                                    int futureCTR = BattleQueue.calculateCTR(100, actiondef.speed);
+                                    int futureDamage = BattleQueue.getTargetFutureDamage(unit, target, futureCTR);
+                                    if (futureDamage > target.hp)
+                                    {
+                                        target = null; //ignore target
                                     }
                                 }
 
@@ -290,14 +315,17 @@ namespace BattleTest
 
                         BattleAction battleAction = new BattleAction(unit, actiondef);
                         battleAction.node = node;
-                        battleAction.targetX = d.X;
-                        battleAction.targetY = d.Y;
                         battleAction.distance = distance;
                         battleAction.damage = totalDamage;
                         battleAction.score = totalScore;
-                        battleAction.spread = newspread;
                         battleAction.moveNodes = moveNodes;
                         battleAction.diamond = diamond;
+
+                        battleAction.target = GameBattle.getMap().getFirstTileUnit(d.X, d.Y);
+                        if (battleAction.target == null)
+                        {
+                            battleAction.target = GameBattle.getMap().tiles[d.X, d.Y];
+                        }
 
                         coverage.Add(battleAction);
 

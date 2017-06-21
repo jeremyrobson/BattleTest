@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BattleTest
 {
-    interface IQueueable : IComparable<IQueueable>, IDrawable
+    public interface IQueueable : IComparable<IQueueable>, IDrawable
     {
         bool Remove { get; set; }
         bool Ready { get; set; }

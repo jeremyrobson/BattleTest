@@ -81,9 +81,8 @@ function containsPoint(list, x, y) {
 }
 
 function select_move_tile(x, y) {
-    console.log(x, y);
     if (containsPoint(movelist, x, y)) {
-        tiles[x][y].units.filter(function(u) {
+        tiles[selunit.x][selunit.y].units = tiles[selunit.x][selunit.y].units.filter(function(u) {
             return u.id != selunit.id;
         });
         selunit.x = x;

@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace BattleTest
 {
-    class BattleTile : ITargetable, IDrawable
+    public class BattleTile : ITargetable, IDrawable
     {
-        public int x;
-        public int y;
+        public int X { get; set; }
+        public int Y { get; set; }
         public string type;
         public string sprite;
         Color color;
@@ -19,8 +19,8 @@ namespace BattleTest
 
         public BattleTile(int x, int y, string type)
         {
-            this.x = x;
-            this.y = y;
+            this.X = x;
+            this.Y = y;
             this.type = type;
             units = new List<BattleUnit>();
 
@@ -58,8 +58,8 @@ namespace BattleTest
         {
             g.FillRectangle(
                 brush,
-                x * GameBattle.TILE_WIDTH,
-                y * GameBattle.TILE_HEIGHT,
+                X * GameBattle.TILE_WIDTH,
+                Y * GameBattle.TILE_HEIGHT,
                 GameBattle.TILE_WIDTH,
                 GameBattle.TILE_HEIGHT);
         }

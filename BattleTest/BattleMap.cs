@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace BattleTest
 {
-    class BattleMap : IDrawable
+    public class BattleMap : IDrawable
     {
         int width;
         int height;
@@ -37,14 +37,14 @@ namespace BattleTest
 
         public void addUnits(List<BattleUnit> units)
         {
-            units.ForEach(unit => this.tiles[unit.x, unit.y].addUnit(unit));
+            units.ForEach(unit => this.tiles[unit.X, unit.Y].addUnit(unit));
         }
 
         public void moveUnit(ref BattleUnit unit, int x, int y)
         {
-            tiles[unit.x,unit.y].removeUnit(unit);
-            unit.x = x;
-            unit.y = y;
+            tiles[unit.X,unit.Y].removeUnit(unit);
+            unit.X = x;
+            unit.Y = y;
             tiles[x,y].addUnit(unit);
 
             if (tiles[x,y].units.Count > 1)
@@ -85,8 +85,8 @@ namespace BattleTest
                     continue;
                 }
 
-                int dx = x - u.x;
-                int dy = y - u.y;
+                int dx = x - u.X;
+                int dy = y - u.Y;
                 double distance = Math.Sqrt(dx * dx + dy * dy);
                 if (u.team == unit.team)
                 { //distance from ally
@@ -99,7 +99,7 @@ namespace BattleTest
             }
 
             //check queue for future action spreads that hit this tile
-            List<BattleAction> actions = GameBattle.queue.getActions(x, y, 20); //find all actions under 20 ctr
+            List<BattleAction> actions = GameBattle.getQueue().getActions(x, y, 20); //find all actions under 20 ctr
             actions.ForEach(action => {
                 // "what if" the unit moved to the proposed x,y?
                 int damage = BattleAction.getDamage(action.actor, unit, action.actiondef);
@@ -137,19 +137,19 @@ namespace BattleTest
         public static List<MoveNode> getMoveNodes(BattleTile[,] tiles, int width, int height, List<BattleUnit> units, BattleUnit unit, int maxSteps, bool filtered = false)
         {
             var binaryMap = createBinaryMap(width, height);
-            binaryMap[unit.x, unit.y] = true; //visit starting node
+            binaryMap[unit.X, unit.Y] = true; //visit starting node
 
             int i = 0, steps = 0;
             int[] xList = new int[] { 0, -1, 0, 1 };
             int[] yList = new int[] { -1, 0, 1, 0 };
             int min = 0, max = 0;
 
-            double initialSafetyScore = getTileSafetyScore(units, unit, unit.x, unit.y);
+            double initialSafetyScore = getTileSafetyScore(units, unit, unit.X, unit.Y);
             double minSafetyScore = initialSafetyScore;
             double maxSafetyScore = initialSafetyScore;
 
             List<MoveNode> nodeList = new List<MoveNode>();
-            nodeList.Add(new MoveNode(unit.x, unit.y, 0, null, initialSafetyScore));
+            nodeList.Add(new MoveNode(unit.X, unit.Y, 0, null, initialSafetyScore));
 
             while (i < nodeList.Count)
             {

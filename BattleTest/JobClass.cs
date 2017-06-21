@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BattleTest
 {
-    class JobClass
+    public class JobClass
     {
         public string name;
         public List<ActionDefinition> actions;

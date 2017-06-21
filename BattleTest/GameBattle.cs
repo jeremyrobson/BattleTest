@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BattleTest
 {
-    class GameBattle
+    public sealed class GameBattle
     {
         public const int MAP_WIDTH = 16;
         public const int MAP_HEIGHT = 16;
@@ -17,8 +17,8 @@ namespace BattleTest
 
         static Timer timer;
 
-        public static GameBattle gameBattle;
-        public static BattleQueue queue;
+        public static volatile GameBattle instance;
+        public BattleQueue queue;
         BattleMap map;
         List<BattleUnit> units;
         IQueueable activeItem;
@@ -42,8 +42,8 @@ namespace BattleTest
 
         public static void start()
         {
-            gameBattle = new GameBattle();
-            timer = new Timer(_ => gameBattle.update(), null, 0, 1000);
+            instance = new GameBattle();
+            timer = new Timer(_ => instance.update(), null, 0, 1000);
         }
 
         public static int generateID()
@@ -68,11 +68,6 @@ namespace BattleTest
             return list.Any(item => item.X == x && item.Y == y);
         }
 
-        public static string getQueue()
-        {
-            return queue.ToString();
-        }
-
         public static void WriteLine(string line)
         {
             consoleCount++;
@@ -86,11 +81,21 @@ namespace BattleTest
             return text;
         }
 
+        public static BattleQueue getQueue()
+        {
+            return instance.queue;
+        }
+
+        public static BattleMap getMap()
+        {
+            return instance.map;
+        }
+
         public static BattleUnit getActiveUnit()
         {
             BattleUnit unit = null;
 
-            IQueueable activeItem = queue.getActiveItem();
+            IQueueable activeItem = instance.queue.getActiveItem();
             if (activeItem != null)
             {
                 if (activeItem.GetType() == typeof(BattleUnit))
@@ -104,12 +109,12 @@ namespace BattleTest
 
         public static List<BattleUnit> getUnits()
         {
-            return gameBattle.units;
+            return instance.units;
         }
 
         public static BattleTile[,] getTiles()
         {
-            return gameBattle.map.tiles;
+            return instance.map.tiles;
         }
 
         public static List<MoveNode> getMoveNodes()

@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace BattleTest
 {
-    interface ITargetable
+    public interface ITargetable
     {
-
+        int X { get; set; }
+        int Y { get; set; }
     }
 }

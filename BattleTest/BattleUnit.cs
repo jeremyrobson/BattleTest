@@ -5,12 +5,12 @@ using System.Linq;
 
 namespace BattleTest
 {
-    class BattleUnit : IQueueable, ITargetable, IDrawable, IEquatable<BattleUnit>
+    public class BattleUnit : IQueueable, ITargetable, IDrawable, IEquatable<BattleUnit>
     {
         static Random random;
 
-        public int x;
-        public int y;
+        public int X { get; set; }
+        public int Y { get; set; }
         public string name;
         public string team;
         public string sprite;
@@ -47,8 +47,8 @@ namespace BattleTest
             this.name = name;
             sprite = name[0].ToString();
             this.team = team;
-            this.x = x;
-            this.y = y;
+            this.X = x;
+            this.Y = y;
             hp = 100;
             status = "alive";
 
@@ -111,7 +111,7 @@ namespace BattleTest
                     action = coverage.First();  //supposedly the best action
 
                     //if action requires move
-                    if (action.node.x != x || action.node.y != y)
+                    if (action.node.x != X || action.node.y != Y)
                     {
                         move = new BattleMove(this, action.node, action.moveNodes);
                         queue.add(move);
@@ -139,7 +139,7 @@ namespace BattleTest
                 queue.add(move);
 
                 //only counts as move if actually moved
-                if (newNode.x != x || newNode.y != y)
+                if (newNode.x != X || newNode.y != Y)
                 {
                     moved = true;
                 }
@@ -171,22 +171,16 @@ namespace BattleTest
 
         public void done()
         {
-            if (moved && acted)
+            CT = 60;
+            if (moved)
             {
-                CT = 100;
+                CT += 20;
             }
-            else if (moved)
+            if (acted)
             {
-                CT = 80;
+                CT += action.actiondef.CTCost;
             }
-            else if (acted)
-            {
-                CT = 80;
-            }
-            else
-            {
-                CT = 60;
-            }
+
             CTR = BattleQueue.calculateCTR(CT, Speed);
             Ready = false;
             moved = false;
@@ -196,8 +190,8 @@ namespace BattleTest
 
         public void draw(Graphics g)
         {
-            float dx = GameBattle.TILE_WIDTH * x;
-            float dy = GameBattle.TILE_HEIGHT * y;
+            float dx = GameBattle.TILE_WIDTH * X;
+            float dy = GameBattle.TILE_HEIGHT * Y;
             g.DrawString(sprite, font, brush, dx, dy);
         }
         

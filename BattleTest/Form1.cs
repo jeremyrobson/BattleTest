@@ -44,7 +44,7 @@ namespace BattleTest
 
             draw();
 
-            textQueue.Text = GameBattle.getQueue();
+            textQueue.Text = GameBattle.getQueue().ToString();
             textConsole.AppendText(GameBattle.getConsoleBuffer());
         }
 

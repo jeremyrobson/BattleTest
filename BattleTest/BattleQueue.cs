@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace BattleTest
 {
-    class BattleQueue
+    public class BattleQueue
     {
         List<IQueueable> list;
 
@@ -71,7 +71,21 @@ namespace BattleTest
 
         public List<BattleAction> getActions(int x, int y, int ctr)
         {
-            return list.OfType<BattleAction>().Where(action => action.CTR <= ctr && GameBattle.listHasPoint(action.spread, x, y)).ToList();
+            return list.OfType<BattleAction>().Where(action => action.CTR <= ctr && GameBattle.listHasPoint(action.Spread, x, y)).ToList();
+        }
+
+        public static int getTargetFutureDamage(BattleUnit unit, BattleUnit target, int CTR)
+        {
+            /*
+             * This function calculates the amount of damage to be inflicted upon a unit from actions
+             * targetted at that unit's x,y location before a given CTR value
+             */
+            BattleQueue queue = GameBattle.getQueue();
+            int damage = 0;
+            List<BattleAction> actions = queue.getActions(target.X, target.Y, CTR);
+
+            actions.ForEach(action => damage += BattleAction.getDamage(unit, target, action.actiondef));
+            return damage;
         }
 
         public override string ToString()
