@@ -42,11 +42,6 @@ namespace BattleTest
                 });
                 return spread;
             }
-
-            set
-            {
-                Spread = value; 
-            }
         }
 
         public BattleAction(BattleUnit actor, ActionDefinition actiondef)
@@ -217,7 +212,6 @@ namespace BattleTest
             BattleAction defaultAction = new BattleAction(actor, ActionDefinition.nothing);
 
             defaultAction.node = new MoveNode(actor.X, actor.Y, 0, null);
-            defaultAction.Spread = new List<Point>();
 
             return defaultAction;
         }
@@ -283,11 +277,14 @@ namespace BattleTest
                                     }
 
                                     //if target is to be killed before action is invoked, ignore target
-                                    int futureCTR = BattleQueue.calculateCTR(100, actiondef.speed);
-                                    int futureDamage = BattleQueue.getTargetFutureDamage(unit, target, futureCTR);
-                                    if (futureDamage > target.hp)
+                                    if (target != null)
                                     {
-                                        target = null; //ignore target
+                                        int futureCTR = BattleQueue.calculateCTR(100, actiondef.speed);
+                                        int futureDamage = BattleQueue.getTargetFutureDamage(unit, target, futureCTR);
+                                        if (futureDamage > target.hp)
+                                        {
+                                            target = null; //ignore target
+                                        }
                                     }
                                 }
 
