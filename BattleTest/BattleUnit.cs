@@ -54,7 +54,7 @@ namespace BattleTest
 
             jobclass = JobClass.squire;
             Speed = 5; // random.Next(3, 10);
-            Priority = 0;
+            Priority = 3;
             CTR = 0;
             CT = 100;
 
@@ -199,8 +199,8 @@ namespace BattleTest
         {
             if (CTR < item.CTR) return -1;
             if (CTR > item.CTR) return 1;
-            if (Priority > item.Priority) return -1;
-            if (Priority < item.Priority) return 1;
+            if (Priority < item.Priority) return -1;
+            if (Priority > item.Priority) return 1;
             if (ID < item.ID) return -1;
             if (ID > item.ID) return 1;
             return 0; //this should never happen

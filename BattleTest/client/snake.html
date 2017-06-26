@@ -1,0 +1,270 @@
+<!doctype html>
+<html>
+
+<head>
+
+<script>
+const MAP_WIDTH = 16, MAP_HEIGHT = 16, TILE_WIDTH = 30, TILE_HEIGHT = 30;
+var canvas, context;
+var tiles;
+var tiletypes = ["water", "grass"];
+var tiletemplates = {
+    "water": {
+        "color": "rgb(0,0,255)"
+    },
+    "grass": {
+        "color": "rgb(0,255,0)"
+    }
+};
+var units;
+var unittypes = ["smiley", "snake"];
+var unittemplates = {
+    "smiley": {
+        "sprite": 0x1F601
+    },
+    "snake": {
+        "sprite": 0x1F40D
+    },
+    "dead": {
+        "sprite": 0x2620
+    }
+};
+var activeUnit;
+var turn = 0;
+var battleOver = false;
+
+function getDistance(a, b) {
+    var dx = b.x - a.x;
+    var dy = b.y - a.y;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+function getTarget(unit) {
+    targets = [];
+    units.forEach(function(u) {
+        if (u.team != unit.team && u.hp > 0) {
+            targets.push({
+                "distance": getDistance(unit, u),
+                "unit": u
+            });
+        }
+    });
+
+    if (targets.length === 0) {
+        return null;
+    }
+    else {
+        targets.sort(function(a, b) {
+            return a.distance - b.distance;
+        });
+        return targets[0].unit;
+    }
+}
+
+function getDamage() {
+    return Math.floor(Math.random() * 7) + Math.floor(Math.random() * 7);
+}
+
+function invokeAction(unit, target) {
+    var damage = getDamage();
+    target.hp -= damage;
+    if (target.hp <= 0) {
+        target.sprite = String.fromCharCode(unittemplates["dead"].sprite);
+        target.hp = 0;
+    }
+}
+
+function moveUnit(unit, x, y) {
+    var newX = unit.x + x;
+    var newY = unit.y + y;
+
+    if (newX < 0 || newY < 0 || newX > MAP_WIDTH || newY > MAP_HEIGHT) {
+        return false;
+    }
+
+    if (!tiles[newX][newY].unit) {
+        tiles[unit.x][unit.y].unit = null;
+        unit.x = newX;
+        unit.y = newY;
+        tiles[unit.x][unit.y].unit = unit;
+        return true;
+    }
+
+    return false;
+}
+
+function create_tile(type, x, y) {
+    return {
+        type,
+        color: tiletemplates[type].color,
+        x, 
+        y,
+        unit: null
+    };
+}
+
+function create_map() {
+    tiles = [];
+    for (var x = 0; x < MAP_WIDTH; x++) {
+        tiles[x] = [];
+        for (var y = 0; y < MAP_HEIGHT; y++) {
+            type = tiletypes[Math.floor(Math.random() * tiletypes.length)];
+            tiles[x][y] = create_tile(type, x, y);
+        }
+    }
+}
+
+function create_unit(type, team, x, y) {
+    return {
+        id: Math.floor(Math.random() * 10000000),
+        type,
+        sprite: String.fromCodePoint(unittemplates[type].sprite),
+        team,
+        x,
+        y,
+        hp: Math.floor(Math.random() * 50) + 20,
+        moved: false,
+        acted: false,
+        tryacted: false,
+        done: function() {
+            this.moved = false;
+            this.acted = false;
+            this.tryacted = false;
+            this.target = null;
+        }
+    };
+}
+
+function create_units() {
+    units = [];
+    for (var i=0; i<5; i++) {
+        var x = i * 2 + 2;
+        var y = Math.floor(Math.random() * 6) + 10;
+        units.push(create_unit("smiley", 0, x, y));
+    }
+    for (var i=0; i<5; i++) {
+        var x = i * 2 + 3;
+        var y = Math.floor(Math.random() * 6);
+        units.push(create_unit("snake", 1, x, y));
+    }
+}
+
+function update() {
+    if (turn >= units.length) {
+        turn = 0;
+    }
+
+    if (!activeUnit) {
+        activeUnit = units[turn];
+        if (activeUnit.hp <= 0) {
+            activeUnit = null;
+            turn++;
+        }
+    }
+    else {
+        if (!activeUnit.target) {
+            activeUnit.target = getTarget(activeUnit);
+            if (activeUnit.target === null) {
+                battleOver = true;
+                console.log("battle over");
+            }
+        }
+        else {
+            if (!activeUnit.tryacted) {
+                var distance = getDistance(activeUnit, activeUnit.target);
+                if (distance <= 1) {
+                    invokeAction(activeUnit, activeUnit.target);
+                    activeUnit.acted = true;
+                }
+                activeUnit.tryacted = true;
+            }
+            else if (!activeUnit.moved) {
+
+                if (Math.random() > 0.5) {
+                    if (activeUnit.y < activeUnit.target.y) {
+                        activeUnit.moved = moveUnit(activeUnit, 0, 1);
+                    }
+                    
+                    if (!activeUnit.moved && activeUnit.y > activeUnit.target.y) {
+                        activeUnit.moved = moveUnit(activeUnit, 0, -1);
+                    }
+                }
+                else {
+                    if (!activeUnit.moved && activeUnit.x < activeUnit.target.x) {
+                        activeUnit.moved = moveUnit(activeUnit, 1, 0);
+                    }
+
+                    if (!activeUnit.moved && activeUnit.x > activeUnit.target.x) {
+                        activeUnit.moved = moveUnit(activeUnit, -1, 0);
+                    }
+                }
+
+                if (!activeUnit.moved) {
+                    var xmove = [0, -1, 0, 1];
+                    var ymove = [-1, 0, 1, 0];
+                    var j = Math.floor(Math.random() * 4);
+                    var x = xmove[j];
+                    var y = ymove[j];
+                    activeUnit.moved = moveUnit(activeUnit, x, y);
+                }
+            }
+            else if (!activeUnit.acted) {
+                var distance = getDistance(activeUnit, activeUnit.target);
+                if (distance <= 1) {
+                    invokeAction(activeUnit, activeUnit.target);
+                }
+                activeUnit.acted = true;
+            }
+            else if (activeUnit.moved && activeUnit.acted) {
+                turn++;
+                activeUnit.done();
+                activeUnit = null;
+            }
+        }
+    }
+
+    draw();
+    requestAnimationFrame(update);
+}
+
+function draw() {
+    for (var x=0; x < MAP_WIDTH; x++) {
+        for (var y=0; y< MAP_HEIGHT; y++) {
+            context.fillStyle = tiles[x][y].color;
+            context.fillRect(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+        }
+    }
+
+    units.forEach(function(u) {
+        context.fillStyle = "rgb(255,255,255)";
+        context.font = "24px Arial";
+        context.textBaseline = "top";
+        context.fillText(u.sprite, u.x * TILE_WIDTH, u.y * TILE_HEIGHT);
+    });
+}
+
+window.onload = function() {
+    canvas = document.getElementById("canvas");
+    context = canvas.getContext("2d");
+
+    create_map();
+    create_units();
+
+    units.forEach(function(u) {
+        moveUnit(u, 0, 0);
+    });
+
+    update();
+};
+
+</script>
+
+</head>
+
+<body>
+
+<canvas id="canvas" width="640" height="480"></canvas>
+
+</body>
+
+</html>

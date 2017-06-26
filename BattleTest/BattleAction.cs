@@ -49,7 +49,7 @@ namespace BattleTest
             this.actor = actor;
             this.actiondef = actiondef;
             CTR = BattleQueue.calculateCTR(100, actiondef.speed);
-            Priority = 1;
+            Priority = 2;
             ID = GameBattle.generateID();
 
             //rangeBrush = new SolidBrush(Color.FromArgb(255, 255, 0, 0));
@@ -135,8 +135,10 @@ namespace BattleTest
         {
             if (CTR < item.CTR) return -1;
             if (CTR > item.CTR) return 1;
-            if (Priority > item.Priority) return -1;
-            if (Priority < item.Priority) return 1;
+            if (Priority < item.Priority) return -1;
+            if (Priority > item.Priority) return 1;
+            if (ID < item.ID) return -1;
+            if (ID > item.ID) return 1;
             return 0; //this should never happen
         }
 
@@ -223,13 +225,22 @@ namespace BattleTest
             List<BattleAction> coverage = new List<BattleAction>();
             coverage.Add(getDefaultAction(unit));
 
+            //if currently charging action, add it to coverage as well to see if it is worth switching
+            if (unit.action != null)
+            {
+                int damage = getDamage(unit, unit.action.target, unit.action.actiondef);
+                unit.action.score = getScore(unit, unit.action.target, damage);
+                coverage.Add(unit.action);
+            }
+
             List<MoveNode> moveNodes = new List<MoveNode>();
             
+            //if already moved, generate move nodes for current position only
             if (unit.moved)
             {
                 moveNodes.Add(new MoveNode(unit.X, unit.Y, 0, null));
             }
-            else
+            else //generate all move nodes using pathfinding algorithm
             {
                 moveNodes = BattleMap.getMoveNodes(map.tiles, GameBattle.MAP_WIDTH, GameBattle.MAP_HEIGHT, units, unit, -999, true); //list of possible move nodes
                 moveNodes = moveNodes.Where(node => node.steps <= unit.moveLimit).ToList();
@@ -239,10 +250,10 @@ namespace BattleTest
                 moveNodes.ForEach(node => {
                     var diamond = createDiamond(node.x, node.y, actiondef.range, GameBattle.MAP_WIDTH, GameBattle.MAP_HEIGHT, false); //list of possible action nodes
                     diamond.ForEach(d => {
-                        List<Point> newspread = new List<Point>();
                         int totalDamage = 0;
                         double totalScore = 0;
-                        int CTR = BattleQueue.calculateCTR(100, actiondef.speed);
+                        int actionCTR = BattleQueue.calculateCTR(100, actiondef.speed);
+                        bool sticky = false;
 
                         actiondef.spread.ForEach(s => {
                             int x = s.X + d.X;
@@ -250,10 +261,6 @@ namespace BattleTest
 
                             if (BattleMap.inRange(x, y)) //if target node is in range
                             {
-
-                                //save spread so queue can see if action contains point (or something like that)
-                                newspread.Add(new Point(x, y));    
-
                                 BattleUnit target = null;
 
                                 if (x == node.x && y == node.y) //is this where the actor is moving to?
@@ -262,7 +269,7 @@ namespace BattleTest
                                 }
                                 else
                                 {
-                                    target = map.getFirstTileUnit(x, y); //get the unit at target node
+                                    target = map.getFirstTileUnit(x, y); //get the unit at spread node
 
                                     //if target is actor but actor will move before it hits
                                     if (target != null && unit.Equals(target) && (node.x != unit.X || node.y != unit.Y))
@@ -270,17 +277,29 @@ namespace BattleTest
                                         target = null; //ignore actor
                                     }
 
-                                    //if action will be invoked after target's turn
-                                    if (target != null && target.CTR > CTR)
+                                    //if action will be invoked after target's turn (target has opportunity to move)
+                                    if (target != null && target.CTR < actionCTR)
                                     {
-                                        //target = null; //ignore target
+                                        if (actiondef.sticky) //action can stick
+                                        {
+                                            sticky = true;
+                                        }
+                                        else //action cannot stick
+                                        {
+                                            target = null; //ignore target
+                                        }
                                     }
 
-                                    //if target is to be killed before action is invoked, ignore target
+                                    //if action will invoke before target's turn
+                                    if (target != null & target.CTR >= actionCTR)
+                                    {
+                                        //pass
+                                    }
+
+                                    //if target is to be killed before action is invoked
                                     if (target != null)
                                     {
-                                        int futureCTR = BattleQueue.calculateCTR(100, actiondef.speed);
-                                        int futureDamage = BattleQueue.getTargetFutureDamage(unit, target, futureCTR);
+                                        int futureDamage = BattleQueue.getTargetFutureDamage(unit, target, actionCTR);
                                         if (futureDamage > target.hp)
                                         {
                                             target = null; //ignore target
@@ -318,7 +337,11 @@ namespace BattleTest
                         battleAction.moveNodes = moveNodes;
                         battleAction.diamond = diamond;
 
-                        battleAction.target = GameBattle.getMap().getFirstTileUnit(d.X, d.Y);
+                        if (sticky)
+                        {
+                            battleAction.target = GameBattle.getMap().getFirstTileUnit(d.X, d.Y);
+                        }
+
                         if (battleAction.target == null)
                         {
                             battleAction.target = GameBattle.getMap().tiles[d.X, d.Y];
