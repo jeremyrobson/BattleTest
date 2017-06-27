@@ -10,10 +10,10 @@ var tiles;
 var tiletypes = ["water", "grass"];
 var tiletemplates = {
     "water": {
-        "color": "rgb(0,0,255)"
+        "color": "rgb(55,55,155)"
     },
     "grass": {
-        "color": "rgb(0,255,0)"
+        "color": "rgb(55,155,55)"
     }
 };
 var units;
@@ -32,6 +32,22 @@ var unittemplates = {
 var activeUnit;
 var turn = 0;
 var battleOver = false;
+
+function create_health_bar(unit) {
+    console.log(unit);
+    var healthbar = {};
+    healthbar = {
+        unit,
+        draw: function() {
+            context.fillStyle = "rgb(0,255,0)";
+            context.fillRect(unit.x * TILE_WIDTH, unit.y * TILE_WIDTH + 30, unit.hp / unit.maxhp * 32, 5);
+            context.strokeStyle = "rgb(255,255,255)";
+            context.lineWidth = 1;
+            context.strokeRect(unit.x * TILE_WIDTH, unit.y * TILE_HEIGHT + 30, 32, 5);
+        }
+    };
+    return healthbar;
+}
 
 function getDistance(a, b) {
     var dx = b.x - a.x;
@@ -114,25 +130,31 @@ function create_map() {
     }
 }
 
-function create_unit(type, team, x, y) {
-    return {
-        id: Math.floor(Math.random() * 10000000),
-        type,
-        sprite: String.fromCodePoint(unittemplates[type].sprite),
-        team,
-        x,
-        y,
-        hp: Math.floor(Math.random() * 50) + 20,
-        moved: false,
-        acted: false,
-        tryacted: false,
-        done: function() {
-            this.moved = false;
-            this.acted = false;
-            this.tryacted = false;
-            this.target = null;
-        }
-    };
+class BattleUnit {
+    constructor(type, team, x, y) {
+        this.type = type;
+        this.team = team;
+        this.x = x;
+        this.y = y;
+        this.id = Math.floor(Math.random() * 10000000);
+        this.sprite = String.fromCodePoint(unittemplates[type].sprite);
+        this.maxhp = Math.floor(Math.random() * 50) + 20;
+        this.hp = this.maxhp
+        this.moved = false;
+        this.acted = false;
+        this.tryacted = false;
+        this.moveTries = 0;
+        this.target = null;
+        this.healthbar = create_health_bar(this);
+    }
+
+    done() {
+        this.moved = false;
+        this.acted = false;
+        this.tryacted = false;
+        this.moveTries = 0;
+        this.target = null;
+    }
 }
 
 function create_units() {
@@ -140,12 +162,12 @@ function create_units() {
     for (var i=0; i<5; i++) {
         var x = i * 2 + 2;
         var y = Math.floor(Math.random() * 6) + 10;
-        units.push(create_unit("smiley", 0, x, y));
+        units.push(new BattleUnit("smiley", 0, x, y));
     }
     for (var i=0; i<5; i++) {
         var x = i * 2 + 3;
         var y = Math.floor(Math.random() * 6);
-        units.push(create_unit("snake", 1, x, y));
+        units.push(new BattleUnit("snake", 1, x, y));
     }
 }
 
@@ -207,6 +229,11 @@ function update() {
                     var y = ymove[j];
                     activeUnit.moved = moveUnit(activeUnit, x, y);
                 }
+
+                activeUnit.moveTries++;
+                if (activeUnit.moveTries > 100) {
+                    activeUnit.moved = true;
+                }
             }
             else if (!activeUnit.acted) {
                 var distance = getDistance(activeUnit, activeUnit.target);
@@ -240,6 +267,8 @@ function draw() {
         context.font = "24px Arial";
         context.textBaseline = "top";
         context.fillText(u.sprite, u.x * TILE_WIDTH, u.y * TILE_HEIGHT);
+
+        u.healthbar.draw();
     });
 }
 
