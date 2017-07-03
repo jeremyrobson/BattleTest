@@ -5,24 +5,24 @@ CREATE DATABASE jeremy_game;
 USE jeremy_game;
 
 CREATE TABLE game_user (
-    user_id INT(11) NOT NULL AUTO_INCREMENT,
-    username VARCHAR(255) NOT NULL,
+    user_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_party (
-    party_id INT(11) NOT NULL AUTO_INCREMENT,
+    party_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     user_id INT(11),
     gold INT(11)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_stat (
-    stat_id INT(11) NOT NULL,
+    stat_id INT(11) NOT NULL PRIMARY KEY,
     stat_name VARCHAR(255)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_race (
-    race_id INT(11) NOT NULL,
+    race_id INT(11) NOT NULL PRIMARY KEY,
     race_name VARCHAR(255),
     base_hp INT(11),
     base_mp INT(11),
@@ -30,10 +30,10 @@ CREATE TABLE game_race (
     base_agl INT(11),
     base_mag INT(11),
     base_sta INT(11)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_job_class (
-    job_class_id INT(11) NOT NULL,
+    job_class_id INT(11) NOT NULL PRIMARY KEY,
     job_class_name VARCHAR(255),
     mod_move INT(11),
     mod_hp INT(11),
@@ -42,11 +42,10 @@ CREATE TABLE game_job_class (
     mod_agl INT(11),
     mod_mag INT(11),
     mod_sta INT(11)
-);
-
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_unit (
-    unit_id INT(11) NOT NULL AUTO_INCREMENT,
+    unit_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     party_id INT(11),
     race_id INT(11),
     unit_name VARCHAR(255),
@@ -58,52 +57,52 @@ CREATE TABLE game_unit (
     max_agl INT(11),
     max_mag INT(11),
     max_sta INT(11)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_item_class (
-    item_class_id INT(11) NOT NULL,
+    item_class_id INT(11) NOT NULL PRIMARY KEY,
     item_class_name VARCHAR(255)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_item_type (
-    item_type_id INT(11) NOT NULL,
+    item_type_id INT(11) NOT NULL PRIMARY KEY,
     item_class_id INT(11),
     item_type_name VARCHAR(255)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_element (
-    element_id INT(11) NOT NULL,
+    element_id INT(11) NOT NULL PRIMARY KEY,
     element_name VARCHAR(255),
     weak_id INT(11),
     stat VARCHAR(255)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_buff (
-    buff_id INT(11) NOT NULL,
+    buff_id INT(11) NOT NULL PRIMARY KEY,
     buff_name VARCHAR(255),
     buff_formula VARCHAR(255)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_status_effect (
-    status_effect_id INT(11) NOT NULL,
+    status_effect_id INT(11) NOT NULL PRIMARY KEY,
     status_effect_name VARCHAR(11)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_material (
-    material_id INT(11) NOT NULL,
+    material_id INT(11) NOT NULL PRIMARY KEY,
     material_name VARCHAR(255),
     mod_pow INT(11),
     mod_def INT(11)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_quality (
-    quality_id INT(11) NOT NULL,
+    quality_id INT(11) NOT NULL PRIMARY KEY,
     quality_name VARCHAR(255),
     multiplier DECIMAL(11,5)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_item (
-    item_id INT(11) NOT NULL AUTO_INCREMENT,
+    item_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     unit_id INT(11),
     material_id INT(11),
     quality_id INT(11),
@@ -121,43 +120,43 @@ CREATE TABLE game_item (
     mod_mag INT(11),
     mod_sta INT(11),
     price INT(11)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_party_item (
-    party_item_id INT(11) NOT NULL AUTO_INCREMENT,
+    party_item_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     party_id INT(11),
     item_id INT(11)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_item_buff (
-    item_buff_id INT(11) NOT NULL AUTO_INCREMENT,
+    item_buff_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     buff_id INT(11),
     item_id INT(11),
     stat_id INT(11),
     element_id INT(11),
     status_effect_id INT(11),
     multiplier DECIMAL(11, 5)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_item_type_material (
-    item_type_material_id INT(11) NOT NULL AUTO_INCREMENT,
+    item_type_material_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     item_type_id INT(11),
     material_id INT(11)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_race_buff (
-    race_buff_id INT(11) NOT NULL AUTO_INCREMENT,
+    race_buff_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     race_id INT(11),
     buff_id INT(11)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_unit_item (
-    unit_item_class_id INT(11) NOT NULL AUTO_INCREMENT,
+    unit_item_class_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     unit_id INT(11),
     item_id INT(11),
     item_class_id INT(11),
     UNIQUE KEY unit_item_class (unit_id, item_class_id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT INTO game_stat (stat_id, stat_name) VALUES
 (1, "hp"),
@@ -175,7 +174,7 @@ INSERT INTO game_race (race_id, race_name, base_hp, base_mp, base_str, base_agl,
 (1, "Human", 100, 50, 5, 5, 5, 5),
 (2, "Elf", 80, 80, 5, 10, 10, 5);
 
-INSERT INTO game_job_class (job_class_name, mod_hp, mod_mp, mod_str, mod_agl, mod_mag, mod_sta) VALUES
+INSERT INTO game_job_class (job_class_id, job_class_name, mod_hp, mod_mp, mod_str, mod_agl, mod_mag, mod_sta) VALUES
 (1, "Squire", 50, 0, 2, 2, 0, 2);
 
 INSERT INTO game_item_class (item_class_id, item_class_name) VALUES
