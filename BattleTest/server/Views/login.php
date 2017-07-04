@@ -1,18 +1,18 @@
 <?php
-    if (!isset($input_username)) {
-        $input_username = "";
+    if (!isset($username)) {
+        $username = "";
     }
 ?>
 
 <h1>Login</h1>
 <form action="" method="post">
     <input type="hidden" name="action" value="login" />
-    <div class="form-group">
-        <label for="username">Username:</label>
-        <input type="text" class="form-control" id="username" name="username" value="<?=$input_username?>">
+    <div class="form-group has-danger">
+        <label class="form-control-label" for="username">Username:</label>
+        <input type="text" class="form-control" id="username" name="username" value="<?=$username?>">
     </div>
     <div class="form-group">
-        <label for="password">Password:</label>
+        <label class="form-control-label" for="password">Password:</label>
         <input type="password" class="form-control" id="password" name="password">
     </div>
     <div class="pull-right">

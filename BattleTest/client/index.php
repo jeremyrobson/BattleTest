@@ -1,6 +1,12 @@
 <?php
-include_once("../server/API/BattleAPI.php");
+
+require_once("../server/Managers/LoginMgr.php");
+require_once("../server/Managers/RegisterMgr.php");
+require_once("../server/Managers/HomeMgr.php");
+require_once("../server/Managers/PartyMgr.php");
+
 session_start();
+
 ?>
 
 <!doctype html>
@@ -18,81 +24,26 @@ session_start();
 
 <?php 
 
-$action = null;
+$config = parse_ini_file("../server/config.ini", true);
 
-if (isset($_POST["action"])) {
-    $action = $_POST["action"];
-}
-else if (isset($_GET["action"])) {
-    $action = $_GET["action"];
-}
-
-$page = null;
-
+//todo: change to better page routing method
 if (isset($_GET["p"])) {
     $page = $_GET["p"];
 }
 
-switch ($action) {
-    case "login":
-        $input_username = htmlspecialchars($_POST["username"]);
-        $input_password = htmlspecialchars($_POST["password"]);
-        try {
-            $user = BattleAPI::getUserByUsername($input_username);
-            BattleAPI::verifyUserPassword($input_username, $input_password);
-            $_SESSION["username"] = $input_username;
-            header("Location: index.php?p=home");
-            die();
-        }
-        catch (Exception $e) {
-            $error_msg = $e->getMessage();
-        }
-        break;
-    case "logout":
-        unset($_SESSION["username"]);
-            $_SESSION["success_msg"] = "You have successfully logged out!";
-            header("Location: index.php?p=login");
-            die();
-        break;
-    case "register":
-        $input_username = htmlspecialchars($_POST["username"]);
-        $input_password = htmlspecialchars($_POST["password"]);
-        try {
-            $user = BattleAPI::registerUser($input_username, $input_password);
-            $_SESSION["success_msg"] = "You have successfully registered!";
-            header("Location: index.php?p=login");
-            die();
-        }
-        catch (Exception $e) {
-            $error_msg = $e->getMessage();
-        }
-        break;
-    default:
-        break;
+//404
+//todo: logged in user defaults to home, not login
+if (!array_key_exists($page, $config["managers"])) {
+    $page = "login";
 }
+
+$class = new $config["managers"][$page]();
+
+extract($class->output);
 
 require "../server/Views/navbar.php";
 require "../server/Views/alert.php";
-
-switch ($page) {
-    case "test":
-        require "../server/Views/test.php";
-        break;
-    case "register":
-        require "../server/Views/register.php";
-        break;
-    case "home":
-        if (!isset($_SESSION["username"])) {
-            header("Location: index.php?p=login");
-            die();
-        }
-        require "../server/Views/home.php";
-        break;
-    case "login":
-    default:
-        require "../server/Views/login.php";
-        break;
-}
+require $class->template;
 
 ?>
 

@@ -13,6 +13,7 @@ CREATE TABLE game_user (
 CREATE TABLE game_party (
     party_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     user_id INT(11),
+    party_name VARCHAR(255),
     gold INT(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -46,10 +47,11 @@ CREATE TABLE game_job_class (
 
 CREATE TABLE game_unit (
     unit_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    user_id INT(11),
     party_id INT(11),
     race_id INT(11),
     unit_name VARCHAR(255),
-    job_class VARCHAR(255),
+    job_class_id INT(11),
     max_move INT(11),
     max_hp INT(11),
     max_mp INT(11),
