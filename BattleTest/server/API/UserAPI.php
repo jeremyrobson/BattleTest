@@ -1,10 +1,14 @@
 <?php
 
+include_once("../server/Validate/UserValidate.php");
 include_once("../server/DAO/UserDAO.php");
 
 trait UserAPI {
 
-    public function getUserByUsername($username) {
+    public static function getUserByUsername($username) {
+        $validate = new UserValidate();
+        $validate->getUserByUsername($username);
+
         $daUser = new UserDAO();
         $user = $daUser->getUserByUsername($username);
         if (empty($user)) {
@@ -13,12 +17,15 @@ trait UserAPI {
         return $user;
     }
 
-    public function verifyUserPassword($username, $password) {
+    public static function verifyUserPassword($username, $password) {
         $daUser = new UserDAO();
         $user = $daUser->verifyUserPassword($username, $password);
     }
 
-    public function registerUser($username, $password) {
+    public static function registerUser($username, $password) {
+        $validate = new UserValidate();
+        $validate->registerUser($username, $password);
+
         $daUser = new UserDAO();
         $user = $daUser->getUserByUsername($username);
         if (!empty($user)) {

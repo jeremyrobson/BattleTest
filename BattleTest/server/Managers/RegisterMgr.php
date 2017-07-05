@@ -28,9 +28,12 @@ class RegisterMgr extends BaseMgr {
             header("Location: index.php?p=login");
             die();
         }
+        catch (BattleException $e) {
+            $_SESSION["error_msg"] = $e->getMessage();
+            $this->output["error"] = $e->error;
+        }
         catch (Exception $e) {
             $_SESSION["error_msg"] = $e->getMessage();
-            //todo: form validation
         }
     }
 }

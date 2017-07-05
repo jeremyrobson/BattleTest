@@ -13,7 +13,9 @@ class BaseMgr {
 
     public function __construct() {
         $this->input = array();
-        $this->output = array();
+        $this->output = array(
+            "error" => array()
+        );
 
         $this->input["post"] = $_POST;
         $this->input["get"] = $_GET;

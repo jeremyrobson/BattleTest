@@ -10,10 +10,16 @@
     <div class="form-group">
         <label for="username">Username:</label>
         <input type="text" class="form-control" id="username" name="username" value="<?=$input_username?>">
+        <?php if (isset($error["username"])): ?>
+        <div class="text-danger"><?=$error["username"]?></div>
+        <?php endif; ?>
     </div>
     <div class="form-group">
         <label for="password">Password:</label>
         <input type="password" class="form-control" id="password" name="password">
+        <?php if (isset($error["password"])): ?>
+        <div class="text-danger"><?=$error["password"]?></div>
+        <?php endif; ?>
     </div>
     <button class="btn btn-lg btn-primary" type="submit">Register</button>
 </form>
