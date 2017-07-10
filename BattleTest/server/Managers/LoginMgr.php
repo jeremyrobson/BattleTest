@@ -3,7 +3,8 @@
 include_once("../server/Managers/BaseMgr.php");
 
 class LoginMgr extends BaseMgr {
-    function route($action) {
+    
+    function route(&$action) {
         parent::route($action);
 
         $this->template = "../server/Views/login.php";
@@ -28,8 +29,9 @@ class LoginMgr extends BaseMgr {
             $user = BattleAPI::getUserByUsername($input_username);
             BattleAPI::verifyUserPassword($input_username, $input_password);
             $_SESSION["user"] = $user;
-            header("Location: index.php?p=home");
-            die();
+            $this->redirect(array(
+                "page" => "home"
+            ));
         }
         catch (BattleException $e) {
             $_SESSION["error_msg"] = $e->getMessage();
@@ -43,8 +45,9 @@ class LoginMgr extends BaseMgr {
     function logout() {
         unset($_SESSION["user"]);
         $_SESSION["success_msg"] = "You have successfully logged out!";
-        header("Location: index.php?p=login");
-        die();
+        $this->redirect(array(
+            "page" => "login"
+        ));
     }
 }
 

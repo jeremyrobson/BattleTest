@@ -3,13 +3,15 @@
 include_once("../server/Managers/BaseMgr.php");
 
 class HomeMgr extends BaseMgr {
-    function route($action) {
+    
+    function route(&$action) {
         parent::route($action);
 
         if (!$this->logged) {
             $_SESSION["error_msg"] = "You must be logged in to view this page!";
-            header("Location: index.php?p=login");
-            die();
+            $this->redirect(array(
+                "page" => "login"
+            ));
         }
 
         $this->template = "../server/Views/home.php";

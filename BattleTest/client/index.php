@@ -1,9 +1,13 @@
 <?php
 
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
+
 require_once("../server/Managers/LoginMgr.php");
 require_once("../server/Managers/RegisterMgr.php");
 require_once("../server/Managers/HomeMgr.php");
 require_once("../server/Managers/PartyMgr.php");
+require_once("../server/Managers/UnitMgr.php");
 
 session_start();
 
@@ -27,8 +31,8 @@ session_start();
 $config = parse_ini_file("../server/config.ini", true);
 
 //todo: change to better page routing method
-if (isset($_GET["p"])) {
-    $page = $_GET["p"];
+if (isset($_GET["page"])) {
+    $page = $_GET["page"];
 }
 
 //404

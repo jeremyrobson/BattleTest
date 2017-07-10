@@ -1,12 +1,11 @@
 <?php
 
-include_once("../server/Validate/UserValidate.php");
 include_once("../server/DAO/UserDAO.php");
 
 trait UserAPI {
 
     public static function getUserByUsername($username) {
-        $validate = new UserValidate();
+        $validate = new BaseValidate();
         $validate->getUserByUsername($username);
 
         $daUser = new UserDAO();
@@ -23,17 +22,11 @@ trait UserAPI {
     }
 
     public static function registerUser($username, $password) {
-        $validate = new UserValidate();
+        $validate = new BaseValidate();
         $validate->registerUser($username, $password);
 
         $daUser = new UserDAO();
-        $user = $daUser->getUserByUsername($username);
-        if (!empty($user)) {
-            throw new Exception("Username already exists!");
-        }
-        else {
-            $daUser->insertUser($username, $password);
-        }
+        $daUser->insertUser($username, $password);
     }
 
 }

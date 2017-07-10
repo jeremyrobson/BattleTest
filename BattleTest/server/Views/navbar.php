@@ -14,7 +14,7 @@
     
         <!-- Home -->
       <li class="nav-item <?php if ($page == "home") { echo 'active'; } ?>">
-        <a class="nav-link" href="index.php?p=home">Home <span class="sr-only">(current)</span></a>
+        <a class="nav-link" href="index.php?page=home">Home <span class="sr-only">(current)</span></a>
       </li>
 
       <?php
@@ -22,16 +22,16 @@
       ?>
       <!-- Logout -->
       <li class="nav-item">
-        <a class="nav-link" href="index.php?p=login&amp;action=logout">Logout</a>
+        <a class="nav-link" href="index.php?page=login&amp;action=logout">Logout</a>
       </li>
       <?php else: ?>
       <!-- Login -->
       <li class="nav-item <?php if ($page == "login") { echo 'active'; } ?> ">
-        <a class="nav-link" href="index.php?p=login">Login</a>
+        <a class="nav-link" href="index.php?page=login">Login</a>
       </li>
       <!-- Register -->
       <li class="nav-item <?php if ($page == "register") { echo 'active'; } ?> ">
-        <a class="nav-link" href="index.php?p=register">Register</a>
+        <a class="nav-link" href="index.php?page=register">Register</a>
       </li>
       <?php endif; ?>
 
@@ -41,10 +41,10 @@
             View
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-          <a class="dropdown-item" href="index.php?p=party">Party</a>
-          <a class="dropdown-item" href="index.php?p=inventory">Inventory</a>
-          <a class="dropdown-item" href="index.php?p=stats">Stats</a>
-          <a class="dropdown-item" href="index.php?p=formation">Formation</a>
+          <a class="dropdown-item" href="index.php?page=party">Party</a>
+          <a class="dropdown-item" href="index.php?page=inventory">Inventory</a>
+          <a class="dropdown-item" href="index.php?page=stats">Stats</a>
+          <a class="dropdown-item" href="index.php?page=formation">Formation</a>
         </div>
       </li>
 

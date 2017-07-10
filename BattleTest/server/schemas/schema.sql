@@ -18,7 +18,7 @@ CREATE TABLE game_party (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_stat (
-    stat_id INT(11) NOT NULL PRIMARY KEY,
+    stat_id VARCHAR(255),
     stat_name VARCHAR(255)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -30,19 +30,20 @@ CREATE TABLE game_race (
     base_str INT(11),
     base_agl INT(11),
     base_mag INT(11),
-    base_sta INT(11)
+    base_sta INT(11),
+    base_move INT(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_job_class (
     job_class_id INT(11) NOT NULL PRIMARY KEY,
     job_class_name VARCHAR(255),
-    mod_move INT(11),
     mod_hp INT(11),
     mod_mp INT(11),
     mod_str INT(11),
     mod_agl INT(11),
     mod_mag INT(11),
-    mod_sta INT(11)
+    mod_sta INT(11),
+    mod_move INT(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_unit (
@@ -52,13 +53,18 @@ CREATE TABLE game_unit (
     race_id INT(11),
     unit_name VARCHAR(255),
     job_class_id INT(11),
-    max_move INT(11),
     max_hp INT(11),
     max_mp INT(11),
     max_str INT(11),
     max_agl INT(11),
     max_mag INT(11),
-    max_sta INT(11)
+    max_sta INT(11),
+    max_pow INT(11),
+    max_def INT(11),
+    max_acc INT(11),
+    max_evd INT(11),
+    max_move INT(11),
+    max_range INT(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_item_class (
@@ -161,23 +167,25 @@ CREATE TABLE game_unit_item (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT INTO game_stat (stat_id, stat_name) VALUES
-(1, "hp"),
-(2, "mp"),
-(3, "str"),
-(4, "agl"),
-(5, "mag"),
-(6, "sta"),
-(7, "pow"),
-(8, "def"),
-(9, "move"),
-(10, "range");
+("hp", "Health"),
+("mp", "Mana"),
+("str", "Strength"),
+("agl", "Agility"),
+("mag", "Magic"),
+("sta", "Stamina"),
+("pow", "Power"),
+("def", "Defence"),
+("acc", "Accuracy"),
+("evd", "Evade"),
+("move", "Move"),
+("range", "Range");
 
-INSERT INTO game_race (race_id, race_name, base_hp, base_mp, base_str, base_agl, base_mag, base_sta) VALUES
-(1, "Human", 100, 50, 5, 5, 5, 5),
-(2, "Elf", 80, 80, 5, 10, 10, 5);
+INSERT INTO game_race (race_id, race_name, base_hp, base_mp, base_str, base_agl, base_mag, base_sta, base_move) VALUES
+(1, "Human", 100, 50, 5, 5, 5, 5, 3),
+(2, "Elf", 80, 80, 5, 10, 10, 5, 3);
 
-INSERT INTO game_job_class (job_class_id, job_class_name, mod_hp, mod_mp, mod_str, mod_agl, mod_mag, mod_sta) VALUES
-(1, "Squire", 50, 0, 2, 2, 0, 2);
+INSERT INTO game_job_class (job_class_id, job_class_name, mod_hp, mod_mp, mod_str, mod_agl, mod_mag, mod_sta, mod_move) VALUES
+(1, "Squire", 50, 0, 2, 2, 0, 2, 0);
 
 INSERT INTO game_item_class (item_class_id, item_class_name) VALUES
 (1, "Left Hand"),

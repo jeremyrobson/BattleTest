@@ -8,6 +8,7 @@ class BaseMgr {
     public $template;
     public $logged; //todo: change to array of permissions
     public $user;
+    public $data;
     //public $success_msg;
     //public $error_msg;
 
@@ -31,11 +32,21 @@ class BaseMgr {
         $this->route($action);
     }
 
-    public function route($action) {
+    public function route(&$action) {
         if (isset($_SESSION["user"])) {
             $this->logged = true;
             $this->user = $_SESSION["user"];
         }
+
+        if (isset($_POST["action"])) {
+            $action = $_POST["action"];
+        }
+    }
+
+    public function redirect($arr) {
+         $q = http_build_query($arr);
+         header("Location: index.php?$q");
+         die();
     }
 
 }

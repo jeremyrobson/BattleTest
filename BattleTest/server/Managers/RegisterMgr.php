@@ -4,7 +4,7 @@ include_once("../server/Managers/BaseMgr.php");
 
 class RegisterMgr extends BaseMgr {
 
-    function route($action) {
+    function route(&$action) {
         parent::route($action);
 
         $this->template = "../server/Views/register.php";
@@ -25,8 +25,9 @@ class RegisterMgr extends BaseMgr {
         try {
             $user = BattleAPI::registerUser($input_username, $input_password);
             $_SESSION["success_msg"] = "You have successfully registered!";
-            header("Location: index.php?p=login");
-            die();
+            $this->redirect(array(
+                "page" => "login"
+            ));
         }
         catch (BattleException $e) {
             $_SESSION["error_msg"] = $e->getMessage();

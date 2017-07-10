@@ -58,7 +58,6 @@ class UserDAO extends BaseDAO {
                 INSERT INTO game_user (username, password) VALUES
                 (:username, :password)
             ");
-            $args = array();
             $stmt->execute($params);
         }
         catch (PDOException $e) {

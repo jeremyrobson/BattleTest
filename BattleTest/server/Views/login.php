@@ -1,4 +1,5 @@
 <?php
+    //todo: automatically do this
     if (!isset($username)) {
         $username = "";
     }
@@ -24,5 +25,5 @@
     <div class="clearfix"></div>
 </form>
 <div>
-    <a href="index.php?p=register">Register</button>
+    <a href="index.php?page=register">Register</button>
 </div>

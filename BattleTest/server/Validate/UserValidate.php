@@ -1,8 +1,8 @@
 <?php
 
-class UserValidate {
-    
-    public $error;
+include_once("../server/DAO/UserDAO.php");
+
+trait UserValidate {
     
     public function getUserByUsername($username) {
         if (strlen(trim($username)) == 0) {
@@ -21,6 +21,12 @@ class UserValidate {
 
         if (strlen(trim($password)) == 0) {
             $this->error["password"] = "The password must be greater than 0 characters.";
+        }
+
+        $daUser = new UserDAO();
+        $user = $daUser->getUserByUsername($username);
+        if (!empty($user)) {
+            $this->error["username"] = "Username already exists!";
         }
 
         if (!empty($this->error)) {

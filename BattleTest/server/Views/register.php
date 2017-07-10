@@ -1,6 +1,7 @@
 <?php
-    if (!isset($input_username)) {
-        $input_username = "";
+    //todo: automatically do this
+    if (!isset($username)) {
+        $username = "";
     }
 ?>
 
@@ -9,7 +10,7 @@
     <input type="hidden" name="action" value="register" />
     <div class="form-group">
         <label for="username">Username:</label>
-        <input type="text" class="form-control" id="username" name="username" value="<?=$input_username?>">
+        <input type="text" class="form-control" id="username" name="username" value="<?=$username?>">
         <?php if (isset($error["username"])): ?>
         <div class="text-danger"><?=$error["username"]?></div>
         <?php endif; ?>

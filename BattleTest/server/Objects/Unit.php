@@ -1,19 +1,26 @@
 <?php
 
-class Unit {
+include_once("../server/Objects/BaseObject.php");
+
+class Unit extends BaseObject {
     public $unit_id;
     public $user_id;
     public $party_id;
     public $race_id;
-    public $unit_name;
     public $job_class_id;
-    public $max_move;
+    public $unit_name;
     public $max_hp;
     public $max_mp;
     public $max_str;
     public $max_agl;
     public $max_mag;
     public $max_sta;
+    public $max_pow;
+    public $max_def;
+    public $max_acc;
+    public $max_evd;
+    public $max_move;
+    public $max_range;
 }
 
 

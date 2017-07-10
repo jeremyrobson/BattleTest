@@ -18,8 +18,11 @@ class PartyDAO extends BaseDAO {
             $stmt->execute($params);
             $parties = array();
             
-            while ($stmt->fetch()) {
-                $parties[] = $stmt;
+            $daUnit = new UnitDAO();
+
+            while ($row = $stmt->fetch()) {
+                $parties[$row->party_id] = $row;
+                $parties[$row->party_id]->units = $daUnit->getUnitsByPartyId($row->party_id);
             }
         }
         catch (PDOException $e) {
@@ -41,14 +44,34 @@ class PartyDAO extends BaseDAO {
             $stmt->execute($params);
             $party = $stmt->fetch();
 
-            $daUnit = new UnitDAO();
-            $party->units = $daUser->getUnitsByPartyId($party_id);
+            if (!empty($party)) {
+                $daUnit = new UnitDAO();
+                $party->units = $daUnit->getUnitsByPartyId($party_id);
+            }
         }
         catch (PDOException $e) {
             echo $e->getMessage();
         }
 
         return $party;
+    }
+
+    function insertParty($user_id, $party) {
+        try {
+            $params = array(
+                ":user_id" => $user_id,
+                ":party_name" => $party->party_name
+            );
+            $stmt = $this->pdo->prepare("
+                INSERT INTO game_party (user_id, party_name, gold) VALUES
+                (:user_id, :party_name, 1000)
+            ");
+            $stmt->execute($params);
+        }
+        catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+        return true;
     }
 
 }
