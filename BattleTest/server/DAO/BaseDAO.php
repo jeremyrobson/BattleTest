@@ -1,6 +1,7 @@
 <?php
 
 class BaseDAO {
+    static $dao;
     public $pdo;
     
     function __construct() {
@@ -10,6 +11,13 @@ class BaseDAO {
         $username = $config["username"];
         $password = $config["password"];
         $this->pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    }
+
+    static function singleton() {
+        if (!isset(self::$dao)) {
+            self::$dao = new self();
+        }
+        return self::$dao;
     }
 }
 

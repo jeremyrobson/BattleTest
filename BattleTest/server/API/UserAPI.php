@@ -8,7 +8,7 @@ trait UserAPI {
         $validate = new BaseValidate();
         $validate->getUserByUsername($username);
 
-        $daUser = new UserDAO();
+        $daUser = UserDAO::singleton();
         $user = $daUser->getUserByUsername($username);
         if (empty($user)) {
             throw new Exception("User could not be found.");
@@ -17,7 +17,7 @@ trait UserAPI {
     }
 
     public static function verifyUserPassword($username, $password) {
-        $daUser = new UserDAO();
+        $daUser = UserDAO::singleton();
         $user = $daUser->verifyUserPassword($username, $password);
     }
 
@@ -25,7 +25,7 @@ trait UserAPI {
         $validate = new BaseValidate();
         $validate->registerUser($username, $password);
 
-        $daUser = new UserDAO();
+        $daUser = UserDAO::singleton();
         $daUser->insertUser($username, $password);
     }
 
