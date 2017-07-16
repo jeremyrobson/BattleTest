@@ -6,7 +6,37 @@ include_once("../server/Objects/Race.php");
 include_once("../server/Objects/JobClass.php");
 
 class UnitDAO extends BaseDAO {
+
+    static function singleton() {
+        static $instance;
+        if ($instance === null) {
+            $instance = new self;
+        }
+        return $instance;
+    }
+
+    function getUnitByUnitId($unit_id) {
+        $unit = null;
+        try {
+            $params = array(":unit_id" => $unit_id);
+            $stmt = $this->pdo->prepare("
+                SELECT * FROM game_unit
+                WHERE unit_id = :unit_id
+            ");
+            $args = array();
+            $stmt->setFetchMode(PDO::FETCH_CLASS, "Unit", $args);
+            $stmt->execute($params);
+            $unit = $stmt->fetch();
+        }
+        catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+
+        return $unit;
+    }
+
     function getUnitsByPartyId($party_id) {
+        $units = array();
         try {
             $params = array(":party_id" => $party_id);
             $stmt = $this->pdo->prepare("
@@ -14,9 +44,8 @@ class UnitDAO extends BaseDAO {
                 WHERE party_id = :party_id
             ");
             $args = array();
-            $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, "Unit", $args);
+            $stmt->setFetchMode(PDO::FETCH_CLASS, "Unit", $args);
             $stmt->execute($params);
-            $units = array();
             while ($row = $stmt->fetch()) {
                 $units[$row->unit_id] = $row;
             } 
@@ -62,14 +91,14 @@ class UnitDAO extends BaseDAO {
     }
 
     function getRaces() {
+        $races = array();
         try {
             $stmt = $this->pdo->prepare("
                 SELECT * FROM game_race
             ");
             $args = array();
-            $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, "Race", $args);
+            $stmt->setFetchMode(PDO::FETCH_CLASS, "Race", $args);
             $stmt->execute();
-            $races = array();
             while ($row = $stmt->fetch()) {
                 $races[$row->race_id] = $row;
             } 
@@ -81,24 +110,26 @@ class UnitDAO extends BaseDAO {
         return $races;
     }
 
-    function getJobClasses() {
+    function getRaceById($race_id) {
+        $race = null;
         try {
             $stmt = $this->pdo->prepare("
-                SELECT * FROM game_job_class
+                SELECT * FROM game_race
             ");
             $args = array();
-            $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, "JobClass", $args);
+            $stmt->setFetchMode(PDO::FETCH_CLASS, "Race", $args);
             $stmt->execute();
-            $job_classes = array();
-            while ($row = $stmt->fetch()) {
-                $job_classes[$row->job_class_id] = $row;
-            } 
+            $race = $stmt->fetch();
         }
         catch (PDOException $e) {
             echo $e->getMessage();
         }
 
-        return $job_classes;
+        return $race;
+    }
+
+    function deleteUnit() {
+        //never delete, just set status to deleted
     }
 };
 

@@ -25,6 +25,7 @@ class PartyMgr extends BaseMgr {
             case "view":
                 $this->view();
                 break;
+            case "list":
             default:
                 $this->list();
                 break;
@@ -41,6 +42,7 @@ class PartyMgr extends BaseMgr {
     }
 
     function create() {
+        $this->template = "../server/Views/party_add.php";
         $user_id = $_SESSION["user"]->user_id;
         try {
             $party = new Party($this->input["post"]["party"]);
@@ -58,8 +60,6 @@ class PartyMgr extends BaseMgr {
         catch (Exception $e) {
             $_SESSION["error_msg"] = $e->getMessage();
         }
-
-
     }
 
     function view() {

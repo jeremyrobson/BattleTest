@@ -21,6 +21,14 @@ class Unit extends BaseObject {
     public $max_evd;
     public $max_move;
     public $max_range;
+    public $equip;
+
+    public function __construct($arr = array()) {
+        parent::__construct($arr);
+        
+        $this->max_hp = 50;
+        $this->equip = BattleAPI::getItemsByUnitId($this->unit_id);
+    }
 }
 
 

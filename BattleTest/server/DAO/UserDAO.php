@@ -5,6 +5,14 @@ include_once("../server/Objects/User.php");
 
 class UserDAO extends BaseDAO {
 
+    static function singleton() {
+        static $instance;
+        if ($instance === null) {
+            $instance = new self;
+        }
+        return $instance;
+    }
+
     function getUserByUsername($username) {
 
         try {
@@ -14,7 +22,7 @@ class UserDAO extends BaseDAO {
                 WHERE username = :username
             ");
             $args = array();
-            $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, "User", $args);
+            $stmt->setFetchMode(PDO::FETCH_CLASS, "User", $args);
             $stmt->execute($params);
             $user = $stmt->fetch();
         }
@@ -33,7 +41,7 @@ class UserDAO extends BaseDAO {
                 WHERE username = :username
             ");
             $args = array();
-            $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, "User", $args);
+            $stmt->setFetchMode(PDO::FETCH_CLASS, "User", $args);
             $stmt->execute($params);
             $user = $stmt->fetch();
             $hash = $user->password;

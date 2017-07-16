@@ -45,6 +45,7 @@
           <a class="dropdown-item" href="index.php?page=inventory">Inventory</a>
           <a class="dropdown-item" href="index.php?page=stats">Stats</a>
           <a class="dropdown-item" href="index.php?page=formation">Formation</a>
+          <a class="dropdown-item" href="index.php?page=jobclass">Job Classes</a>
         </div>
       </li>
 

@@ -1,5 +1,7 @@
 <?php
 
+include_once("../server/API/BattleAPI.php");
+
 class BaseObject {
     function __construct($arr = array()) {
         foreach ($arr as $k => $v) {

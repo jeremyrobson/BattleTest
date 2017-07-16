@@ -17,23 +17,35 @@ trait UnitAPI {
         return $daUnit->getRaces();
     }
 
-    public static function getJobClasses() {
+    public static function getRaceById($race_id) {
         $daUnit = UnitDAO::singleton();
-        return $daUnit->getJobClasses();
+        return $daUnit->getRaceById($race_id);
     }
 
     public static function createUnit($user_id, $party_id, $unit) {
         $validate = new BaseValidate();
         $validate->validatePartyId($user_id, $party_id);
+        $validate->validateUnit($unit);
 
         $daUnit = UnitDAO::singleton();
         return $daUnit->insertUnit($user_id, $party_id, $unit);
     }
 
-    public static function validatePartyId($user_id, $party_id) {
+    public static function getUnitbyUnitId($user_id, $unit_id) {
+        $validate = new BaseValidate();
+        $validate->getUnitByUnitId($user_id, $unit_id);
+        
+        $daUnit = UnitDAO::singleton();
+        return $daUnit->getUnitByUnitId($unit_id);
+    }
+
+/*
+    public static function validateUnit($user_id, $party_id, $unit) {
         $validate = new BaseValidate();
         $validate->validatePartyId($user_id, $party_id);
+        $validate->validateUnit($unit);
     }
+*/
 
 }
 

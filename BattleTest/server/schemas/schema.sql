@@ -46,6 +46,13 @@ CREATE TABLE game_job_class (
     mod_move INT(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+CREATE TABLE game_skill (
+    skill_id INT(11) NOT NULL PRIMARY KEY,
+    job_class_id INT(11),
+    skill_name VARCHAR(255),
+    job_point_cost INT(11)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 CREATE TABLE game_unit (
     unit_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     user_id INT(11),
@@ -53,6 +60,7 @@ CREATE TABLE game_unit (
     race_id INT(11),
     unit_name VARCHAR(255),
     job_class_id INT(11),
+    status VARCHAR(255),
     max_hp INT(11),
     max_mp INT(11),
     max_str INT(11),
@@ -65,6 +73,19 @@ CREATE TABLE game_unit (
     max_evd INT(11),
     max_move INT(11),
     max_range INT(11)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE game_unit_job_class (
+    unit_job_class_id INT(11) NOT NULL PRIMARY KEY,
+    unit_id INT(11),
+    job_class_id INT(11),
+    job_points INT(11)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE game_unit_skill (
+    unit_skill_id INT(11) NOT NULL PRIMARY KEY,
+    unit_id INT(11),
+    skill_id INT(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_item_class (
@@ -111,7 +132,9 @@ CREATE TABLE game_quality (
 
 CREATE TABLE game_item (
     item_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    unit_id INT(11),
+    item_class_id INT(11),
+    item_type_id INT(11),
+    user_id INT(11),
     material_id INT(11),
     quality_id INT(11),
     item_name VARCHAR(255),
@@ -147,23 +170,35 @@ CREATE TABLE game_item_buff (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_item_type_material (
-    item_type_material_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    item_type_material_id INT(11) NOT NULL PRIMARY KEY,
     item_type_id INT(11),
     material_id INT(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_race_buff (
-    race_buff_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    race_buff_id INT(11) NOT NULL PRIMARY KEY,
     race_id INT(11),
     buff_id INT(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+CREATE TABLE game_item_type_job_class (
+    item_job_class_id INT(11) NOT NULL PRIMARY KEY,
+    item_type_id INT(11),
+    job_class_id INT(11)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 CREATE TABLE game_unit_item (
-    unit_item_class_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    unit_item_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     unit_id INT(11),
     item_id INT(11),
     item_class_id INT(11),
     UNIQUE KEY unit_item_class (unit_id, item_class_id)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE game_unit_status (
+    unit_status_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    unit_id INT(11),
+    status_id INT(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT INTO game_stat (stat_id, stat_name) VALUES
@@ -186,6 +221,9 @@ INSERT INTO game_race (race_id, race_name, base_hp, base_mp, base_str, base_agl,
 
 INSERT INTO game_job_class (job_class_id, job_class_name, mod_hp, mod_mp, mod_str, mod_agl, mod_mag, mod_sta, mod_move) VALUES
 (1, "Squire", 50, 0, 2, 2, 0, 2, 0);
+
+INSERT INTO game_skill (skill_id, job_class_id, skill_name, job_point_cost) VALUES
+(1, 1, "Dash", 100);
 
 INSERT INTO game_item_class (item_class_id, item_class_name) VALUES
 (1, "Left Hand"),

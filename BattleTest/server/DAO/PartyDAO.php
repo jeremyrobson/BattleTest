@@ -6,6 +6,14 @@ include_once("../server/DAO/UnitDAO.php");
 
 class PartyDAO extends BaseDAO {
 
+    static function singleton() {
+        static $instance;
+        if ($instance === null) {
+            $instance = new self;
+        }
+        return $instance;
+    }
+
     function getPartiesByUserId($user_id) {
         try {
             $params = array(":user_id" => $user_id);
@@ -14,7 +22,7 @@ class PartyDAO extends BaseDAO {
                 WHERE user_id = :user_id
             ");
             $args = array();
-            $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, "Party", $args);
+            $stmt->setFetchMode(PDO::FETCH_CLASS, "Party", $args);
             $stmt->execute($params);
             $parties = array();
             
@@ -40,7 +48,7 @@ class PartyDAO extends BaseDAO {
                 WHERE party_id = :party_id
             ");
             $args = array();
-            $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, "Party", $args);
+            $stmt->setFetchMode(PDO::FETCH_CLASS, "Party", $args);
             $stmt->execute($params);
             $party = $stmt->fetch();
 

@@ -13,10 +13,15 @@
 
 <?php
 foreach ($parties as $index => $party):
+    $party_name = $index . ". " . $party->party_name
 ?>
 
 <tr>
-    <td><a href="index.php?page=party&amp;action=view&amp;party_id=<?=$party->party_id?>"><?=$party->party_name?></a></td>
+    <td>
+        <a href="index.php?page=party&amp;action=view&amp;party_id=<?=$party->party_id?>">
+            <?=$party_name?>
+        </a>
+    </td>
     <td><?=$party->gold?></td>
     <td><?=count($party->units);?></td>
     <td><a href="#" class="btn btn-md btn-danger float-right"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Remove</a></td>

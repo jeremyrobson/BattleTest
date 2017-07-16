@@ -9,6 +9,9 @@
             <div class="form-group">
                 <label for="unit_name">Unit Name:</label>
                 <input type="text" class="form-control" id="unit_name" name="unit[unit_name]">
+                <?php if (isset($error["unit_name"])): ?>
+                <div class="text-danger"><?=$error["unit_name"]?></div>
+                <?php endif; ?>
             </div>
         </div>
         <div class="col-md-2">

@@ -24,6 +24,13 @@ class UnitMgr extends BaseMgr {
             case "create":
                 $this->create();
                 break;
+            case "view":
+                $this->view();
+                break;
+            case "edit":
+                $this->edit();
+                break;
+            case "list":
             default:
                 $this->list();
                 break;
@@ -52,14 +59,14 @@ class UnitMgr extends BaseMgr {
 
     function add() {
         $this->template = "../server/Views/unit_add.php";
-        $this->output["races"] = UnitAPI::getRaces();
-        $this->output["job_classes"] = UnitAPI::getJobClasses();
+        $this->output["races"] = BattleAPI::getRaces();
+        $this->output["job_classes"] = BattleAPI::getJobClasses();
         $party_id = $this->input["get"]["party_id"];
         $this->output["party_id"] = $party_id;
         $user_id = $_SESSION["user"]->user_id;
 
         try {
-            UnitAPI::validatePartyId($user_id, $party_id);
+            BattleAPI::validatePartyId($user_id, $party_id);
         }
         catch (BattleException $e) {
             $_SESSION["error_msg"] = $e->getMessage();
@@ -77,6 +84,7 @@ class UnitMgr extends BaseMgr {
     function create() {
         $user_id = $_SESSION["user"]->user_id;
         $party_id = $this->input["post"]["party_id"];
+
         try {
             $unit = new Unit($this->input["post"]["unit"]);
             $unit_id = BattleAPI::createUnit($user_id, $party_id, $unit);
@@ -90,19 +98,46 @@ class UnitMgr extends BaseMgr {
         catch (BattleException $e) {
             $_SESSION["error_msg"] = $e->getMessage();
             $this->output["error"] = $e->error;
+
+            //todo: figure out better way of replicating add() action
+            $this->template = "../server/Views/unit_add.php";
+            $this->output["races"] = BattleAPI::getRaces();
+            $this->output["job_classes"] = BattleAPI::getJobClasses();
+            $party_id = $this->input["get"]["party_id"];
+            $this->output["party_id"] = $party_id;
+            $user_id = $_SESSION["user"]->user_id;
+        }
+        catch (Exception $e) {
+            $_SESSION["error_msg"] = $e->getMessage();
+        }
+    }
+
+    function view() {
+        $this->template = "../server/Views/unit_view.php";
+        $user_id = $_SESSION["user"]->user_id;
+        $unit_id = $this->input["get"]["unit_id"];
+        
+        try {
+            $unit = BattleAPI::getUnitByUnitId($user_id, $unit_id);
+            $this->output["unit"] = $unit;
+            $this->output["race"] = BattleAPI::getRaceById($unit->race_id);
+            $this->output["job_class"] = BattleAPI::getJobClassById($unit->job_class_id);
+            $this->output["item_classes"] = BattleAPI::getItemClasses();
+        }
+        catch (BattleException $e) {
+            $_SESSION["error_msg"] = $e->getMessage();
+            $this->output["error"] = $e->error;
             $this->redirect(array(
                 "page" => "party",
                 "action" => "view",
-                "party_id" => $party_id
+                //"party_id" => $this->input party_id
             ));
         }
         catch (Exception $e) {
             $_SESSION["error_msg"] = $e->getMessage();
         }
 
-
     }
-
 
 }
 

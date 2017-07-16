@@ -11,20 +11,7 @@
     </thead>
     <tbody>
 
-<?php
-foreach ($party->units as $index => $unit):
-?>
-
-<tr>
-    <td><a href="#"><?=$unit->unit_name?></a></td>
-    <td><?=$races[$unit->race_id]->race_name?></td>
-    <td><?=$job_classes[$unit->job_class_id]->job_class_name?></td>
-    <td><a href="#" class="btn btn-md btn-danger float-right"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>Remove</a></td>
-</tr>
-
-<?php
-endforeach;
-?>
+    <?php include_once("unit_list.php"); ?>
 
     </tbody>
 </table>

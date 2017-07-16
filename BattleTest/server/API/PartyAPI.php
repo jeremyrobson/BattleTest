@@ -17,9 +17,17 @@ trait PartyAPI {
         return $daParty->getPartyByPartyId($party_id);
     }
 
-    public static function createParty($user_id, $party_name) {
+    public static function createParty($user_id, $party) {
+        $validate = new BaseValidate();
+        $validate->validateParty($user_id, $party);
+
         $daParty = PartyDAO::singleton();
-        return $daParty->insertParty($user_id, $party_name);
+        return $daParty->insertParty($user_id, $party);
+    }
+
+    public static function validatePartyId($user_id, $party_id) {
+        $validate = new BaseValidate();
+        $validate->validatePartyId($user_id, $party_id);
     }
 
 }

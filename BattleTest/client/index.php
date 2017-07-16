@@ -3,11 +3,13 @@
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
+//todo: get from ini and loop to require
 require_once("../server/Managers/LoginMgr.php");
 require_once("../server/Managers/RegisterMgr.php");
 require_once("../server/Managers/HomeMgr.php");
 require_once("../server/Managers/PartyMgr.php");
 require_once("../server/Managers/UnitMgr.php");
+require_once("../server/Managers/JobClassMgr.php");
 
 session_start();
 
@@ -36,10 +38,6 @@ $page = "login";
 if (isset($_GET["page"])) {
     $page = $_GET["page"];
 }
-
-var_dump($config);
-
-die;
 
 //404
 //todo: logged in user defaults to home, not login
