@@ -135,6 +135,7 @@ CREATE TABLE game_item (
     item_class_id INT(11),
     item_type_id INT(11),
     user_id INT(11),
+    party_id INT(11),
     material_id INT(11),
     quality_id INT(11),
     item_name VARCHAR(255),
@@ -151,12 +152,6 @@ CREATE TABLE game_item (
     mod_mag INT(11),
     mod_sta INT(11),
     price INT(11)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-CREATE TABLE game_party_item (
-    party_item_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    party_id INT(11),
-    item_id INT(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_item_buff (

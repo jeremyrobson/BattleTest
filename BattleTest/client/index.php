@@ -42,7 +42,12 @@ if (isset($_GET["page"])) {
 //404
 //todo: logged in user defaults to home, not login
 if (!array_key_exists($page, $config["managers"])) {
-    $page = "login";
+    if (isset($_SESSION["user"])) {
+        $page = "home";
+    }
+    else {
+        $page = "login";
+    }
 }
 
 $class = new $config["managers"][$page]();

@@ -113,12 +113,14 @@ class UnitDAO extends BaseDAO {
     function getRaceById($race_id) {
         $race = null;
         try {
+            $params = array(":race_id" => $race_id);
             $stmt = $this->pdo->prepare("
                 SELECT * FROM game_race
+                WHERE race_id = :race_id
             ");
             $args = array();
             $stmt->setFetchMode(PDO::FETCH_CLASS, "Race", $args);
-            $stmt->execute();
+            $stmt->execute($params);
             $race = $stmt->fetch();
         }
         catch (PDOException $e) {

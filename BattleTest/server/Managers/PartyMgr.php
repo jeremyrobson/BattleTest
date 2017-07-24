@@ -25,6 +25,9 @@ class PartyMgr extends BaseMgr {
             case "view":
                 $this->view();
                 break;
+            case "create_random_item":
+                $this->create_random_item();
+                break;
             case "list":
             default:
                 $this->list();
@@ -70,6 +73,10 @@ class PartyMgr extends BaseMgr {
             $this->output["party"] = BattleAPI::getPartyByPartyId($user_id, $party_id);
             $this->output["races"] = BattleAPI::getRaces();
             $this->output["job_classes"] = BattleAPI::getJobClasses();
+            $this->output["item_classes"] = BattleAPI::getItemClasses();
+            $this->output["item_types"] = BattleAPI::getItemTypes();
+            $this->output["item_materials"] = BattleAPI::getItemMaterials();
+            $this->output["item_qualities"] = BattleAPI::getItemQualities();
         }
         catch (BattleException $e) {
             $_SESSION["error_msg"] = $e->getMessage();
@@ -84,7 +91,20 @@ class PartyMgr extends BaseMgr {
         }
     }
 
+    function create_random_item() {
+        $user_id = $_SESSION["user"]->user_id;
+        $party_id = $this->input["get"]["party_id"];
 
+        $new_item = BattleAPI::createRandomItem();
+        BattleAPI::addItemToParty($user_id, $party_id, $new_item);
+
+        $this->redirect(array(
+            "page" => "party",
+            "action" => "view",
+            "user_id" => $user_id,
+            "party_id" => $party_id
+        ));
+    }
 }
 
 ?>

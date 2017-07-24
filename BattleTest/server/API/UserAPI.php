@@ -17,6 +17,9 @@ trait UserAPI {
     }
 
     public static function verifyUserPassword($username, $password) {
+        $validate = new BaseValidate();
+        $validate->validateUsernameAndPassword($username, $password);
+
         $daUser = UserDAO::singleton();
         $user = $daUser->verifyUserPassword($username, $password);
     }
