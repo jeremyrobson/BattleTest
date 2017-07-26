@@ -2,6 +2,7 @@
 
 include_once("../server/DAO/BaseDAO.php");
 include_once("../server/Objects/JobClass.php");
+include_once("../server/Objects/Skill.php");
 
 class JobClassDAO extends BaseDAO {
 
@@ -14,6 +15,7 @@ class JobClassDAO extends BaseDAO {
     }
 
     function getJobClasses() {
+        $job_classes = array();
         try {
             $stmt = $this->pdo->prepare("
                 SELECT * FROM game_job_class
@@ -21,7 +23,6 @@ class JobClassDAO extends BaseDAO {
             $args = array();
             $stmt->setFetchMode(PDO::FETCH_CLASS, "JobClass", $args);
             $stmt->execute();
-            $job_classes = array();
             while ($row = $stmt->fetch()) {
                 $job_classes[$row->job_class_id] = $row;
             } 
@@ -72,6 +73,32 @@ class JobClassDAO extends BaseDAO {
         }
 
         return $skills;
+    }
+
+    function getJobClassesByItemTypeId($item_type_id) {
+        $job_classes = array();
+        try {
+            $params = array(
+                ":item_type_id" => $item_type_id
+            );
+            $stmt = $this->pdo->prepare("
+                SELECT * FROM game_job_class
+                INNER JOIN game_item_type_job_class ON game_job_class.job_class_id = game_item_type_job_class.job_class_id
+                INNER JOIN game_item_type ON game_item_type_job_class.item_type_id = game_item_type.item_type_id
+                WHERE game_item_type.item_type_id = :item_type_id
+            ");
+            $stmt->setFetchMode(PDO::FETCH_ASSOC);
+            $stmt->execute($params);
+
+            while ($row = $stmt->fetch()) {
+                $job_classes[$row["job_class_id"]] = $row;
+            }
+        }
+        catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+
+        return $job_classes;
     }
 };
 

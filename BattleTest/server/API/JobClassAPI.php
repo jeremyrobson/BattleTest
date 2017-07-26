@@ -19,4 +19,8 @@ trait JobClassAPI {
         return $daJobClass->getSkillsByJobClassId($job_class_id);
     }
 
+    public static function getJobClassesByItemTypeId($item_type_id) {
+        $daJobClass = JobClassDAO::singleton();
+        return $daJobClass->getJobClassesByItemTypeId($item_type_id);
+    }
 }

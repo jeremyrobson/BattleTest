@@ -14,10 +14,10 @@ class JobClass extends BaseObject {
     public $mod_move;
     public $skills;
 
-    function __contstruct($arr = array()) {
+    function __construct($arr = array()) {
         parent::__construct($arr);
 
-        $this->skills = BattleAPI::getSkillsByJobClassId($job_class_id);
+        $this->skills = BattleAPI::getSkillsByJobClassId($this->job_class_id);
     }
 }
 

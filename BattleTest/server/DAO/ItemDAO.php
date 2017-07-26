@@ -168,14 +168,14 @@ class ItemDAO extends BaseDAO {
         $item_materials = array();
         try {
             $stmt = $this->pdo->prepare("
-                SELECT * FROM game_material
+                SELECT * FROM game_item_material
             ");
             $args = array();
             $stmt->setFetchMode(PDO::FETCH_CLASS, "ItemMaterial", $args);
             $stmt->execute();
 
             while ($row = $stmt->fetch()) {
-                $item_materials[$row->material_id] = $row;
+                $item_materials[$row->item_material_id] = $row;
             }
         }
         catch (PDOException $e) {
@@ -215,7 +215,7 @@ class ItemDAO extends BaseDAO {
             $stmt->execute();
 
             while ($row = $stmt->fetch()) {
-                $item_qualities[$row->quality_id] = $row;
+                $item_qualities[$row->item_quality_id] = $row;
             }
         }
         catch (PDOException $e) {
@@ -255,8 +255,8 @@ class ItemDAO extends BaseDAO {
                 ":item_type_id" => $item->item_type_id,
                 ":user_id" => $item->user_id,
                 ":party_id" => $item->party_id,
-                ":material_id" => $item->material_id,
-                ":quality_id" => $item->quality_id,
+                ":material_id" => $item->item_material_id,
+                ":quality_id" => $item->item_quality_id,
                 ":item_name" => $item->item_name,
                 ":_pow" => $item->_pow,
                 ":_def" => $item->_def,
@@ -274,7 +274,7 @@ class ItemDAO extends BaseDAO {
             );
             $stmt = $this->pdo->prepare("
                 INSERT INTO game_item
-                VALUES (:item_id, :item_class_id, :item_type_id, :user_id, :party_id, :material_id, :quality_id, :item_name, 
+                VALUES (:item_id, :item_class_id, :item_type_id, :user_id, :party_id, :item_material_id, :item_quality_id, :item_name, 
                 :_pow, :_def, :_acc, :_evd, :mod_range, :mod_move, :mod_hp, :mod_mp, :mod_str, :mod_agl, :mod_mag, :mod_sta, :price)
             ");
 
@@ -306,6 +306,148 @@ class ItemDAO extends BaseDAO {
         }
         return true;
     }
+
+    function getItemMaterialsByItemTypeId($item_type_id) {
+        $item_materials = array();
+        try {
+            $params = array(
+                ":item_type_id" => $item_type_id
+            );
+            $stmt = $this->pdo->prepare("
+                SELECT * FROM game_item_material
+                INNER JOIN game_item_type_material ON game_item_material.item_material_id = game_item_type_material.item_material_id
+                INNER JOIN game_item_type ON game_item_type_material.item_type_id = game_item_type.item_type_id
+                WHERE game_item_type_material.item_type_id = :item_type_id
+            ");
+            $stmt->setFetchMode(PDO::FETCH_ASSOC);
+            $stmt->execute($params);
+
+            while ($row = $stmt->fetch()) {
+                $item_materials[$row["item_material_id"]] = $row;
+            }
+        }
+        catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+
+        return $item_materials;
+    }
+
+    function insertItemType($item_type) {
+        try {
+            $params = array(
+                ":item_class_id" => $item_type->item_class_id,
+                ":item_type_name" => $item_type->item_type_name
+            );
+            $stmt = $this->pdo->prepare("
+                INSERT INTO game_item_type
+                VALUES (:item_class_id, :item_type_name, )
+            ");
+            $stmt->execute($params);
+        }
+        catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+
+        return $this->pdo->lastInsertId();
+    }
+
+    function updateItemType($item_type) {
+        try {
+            $params = array(
+                ":item_type_id" => $item_type->item_type_id,
+                ":item_class_id" => $item_type->item_class_id,
+                ":item_type_name" => $item_type->item_type_name
+            );
+            $stmt = $this->pdo->prepare("
+                UPDATE game_item_type
+                SET item_class_id = :item_class_id, item_type_name = :item_type_name
+                WHERE item_type_id = :item_type_id
+            ");
+            $stmt->execute($params);
+        }
+        catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+        return true;
+    }
+
+    function deleteItemTypeMaterial($item_type_id) {
+        try {
+            $params = array(
+                ":item_type_id" => $item_type_id
+            );
+            $stmt = $this->pdo->prepare("
+                DELETE FROM game_item_type_material
+                WHERE item_type_id = :item_type_id
+            ");
+            $stmt->execute($params);
+        }
+        catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+        return true;
+    }
+
+    function insertItemTypeMaterial($item_type_id, $item_materials) {
+        try {
+            $params = array(
+                ":item_type_id" => $item_type->item_type_id
+            );
+            $sql = "
+                INSERT INTO game_item_type_material
+                VALUES
+            ";
+            foreach ($item_materials as $item_material_id) {
+                $sql .= " (null, :item_type_id, $item_material_id)";
+            }
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+        }
+        catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+        return true;
+    }
+
+    function deleteItemTypeJobClass($item_type_id) {
+        try {
+            $params = array(
+                ":item_type_id" => $item_type_id
+            );
+            $stmt = $this->pdo->prepare("
+                DELETE FROM game_item_type_job_class
+                WHERE item_type_id = :item_type_id
+            ");
+            $stmt->execute($params);
+        }
+        catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+        return true;
+    }
+
+    function updateItemTypeJobClass($item_type, $job_classes) {
+        try {
+            $params = array(
+                ":item_type_id" => $item_type->item_type_id
+            );
+            $sql = "
+                INSERT INTO game_item_type_job_class
+                VALUES
+            ";
+            foreach ($item_job_classes as $job_class_id) {
+                $sql .= " (null, :item_type_id, $job_class_id)";
+            }
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+        }
+        catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+        return true;
+    }
+
 
 };
 

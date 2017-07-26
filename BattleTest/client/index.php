@@ -3,13 +3,11 @@
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
-//todo: get from ini and loop to require
-require_once("../server/Managers/LoginMgr.php");
-require_once("../server/Managers/RegisterMgr.php");
-require_once("../server/Managers/HomeMgr.php");
-require_once("../server/Managers/PartyMgr.php");
-require_once("../server/Managers/UnitMgr.php");
-require_once("../server/Managers/JobClassMgr.php");
+$config = parse_ini_file("../server/config.ini", true);
+
+foreach ($config["managers"] as $manager) {
+    require_once("../server/Managers/$manager.php");
+}
 
 session_start();
 
@@ -29,8 +27,6 @@ session_start();
 <body>
 
 <?php 
-
-$config = parse_ini_file("../server/config.ini", true);
 
 //todo: change to better page routing method
 $page = "login";

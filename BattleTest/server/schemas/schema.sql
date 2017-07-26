@@ -117,17 +117,23 @@ CREATE TABLE game_status_effect (
     status_effect_name VARCHAR(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE game_material (
-    material_id INT(11) NOT NULL PRIMARY KEY,
-    material_name VARCHAR(255),
+CREATE TABLE game_item_material (
+    item_material_id INT(11) NOT NULL PRIMARY KEY,
+    item_material_name VARCHAR(255),
     mod_pow INT(11),
     mod_def INT(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE game_quality (
-    quality_id INT(11) NOT NULL PRIMARY KEY,
-    quality_name VARCHAR(255),
+CREATE TABLE game_item_quality (
+    item_quality_id INT(11) NOT NULL PRIMARY KEY,
+    item_quality_name VARCHAR(255),
     multiplier DECIMAL(11,5)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE game_item_type_material (
+    item_type_material_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    item_type_id INT(11),
+    item_material_id INT(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_item (
@@ -164,12 +170,6 @@ CREATE TABLE game_item_buff (
     multiplier DECIMAL(11, 5)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE game_item_type_material (
-    item_type_material_id INT(11) NOT NULL PRIMARY KEY,
-    item_type_id INT(11),
-    material_id INT(11)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
 CREATE TABLE game_race_buff (
     race_buff_id INT(11) NOT NULL PRIMARY KEY,
     race_id INT(11),
@@ -177,7 +177,7 @@ CREATE TABLE game_race_buff (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE game_item_type_job_class (
-    item_job_class_id INT(11) NOT NULL PRIMARY KEY,
+    item_job_class_id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     item_type_id INT(11),
     job_class_id INT(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -246,13 +246,29 @@ INSERT INTO game_element (element_id, element_name, weak_id, stat) VALUES
 (7, "Dark", 6, "evd"),
 (8, "Poison", NULL, NULL);
 
-INSERT INTO game_material (material_id, material_name, mod_pow, mod_def) VALUES
-(1, "Iron", 2, 3),
-(2, "Leather", 0, 2);
+INSERT INTO game_item_material (item_material_id, item_material_name, mod_pow, mod_def) VALUES
+(1, "Cloth", 0, 1),
+(2, "Wood", 1, 3),
+(3, "Iron", 2, 4),
+(4, "Leather", 0, 2),
+(5, "Bronze", 2, 5),
+(6, "Silver", 4, 6),
+(7, "Gold", 6, 8),
+(8, "Diamond", 7, 10),
+(9, "Crystal", 8, 12),
+(10, "Dragon", 10, 14),
+(11, "Adamantium", 12, 16),
+(12, "Angelic", 15, 20);
 
-INSERT INTO game_quality (quality_id, quality_name, multiplier) VALUES
+INSERT INTO game_item_quality (item_quality_id, item_quality_name, multiplier) VALUES
 (1, "Decent", 1),
-(2, "Durable", 1.1);
+(2, "Durable", 1.1),
+(3, "Poor", 0.8),
+(4, "Flimsy", 0.6);
+
+INSERT INTO game_item_type_material (item_type_id, item_material_id) VALUES
+(1, 2),(1,3),(1,5),(1,6),(1,7),(1,8),(1,9),(1,10),(1,11),(1,12),
+(2, 2),(2,5),(2,6),(2,7),(2,8),(2,9),(2,10),(2,11),(2,12);
 
 INSERT INTO game_buff (buff_id, buff_name, buff_formula) VALUES
 (1, "Added", "stat * multiplier");

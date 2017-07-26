@@ -83,4 +83,43 @@ trait ItemAPI {
         $daItem = ItemDAO::singleton();
         return $daItem->addItemToParty($user_id, $party_id, $item);
     }
+
+    public static function getItemMaterialsByItemTypeId($item_type_id) {
+        $daItem = ItemDAO::singleton();
+        return $daItem->getItemMaterialsByItemTypeId($item_type_id);
+    }
+
+    public static function createItemType($usr_id, $item_type) {
+        //todo: validation
+
+        $daItem = ItemDAO::singleton();
+        $item_type_id = $daItem->insertItemType($item_type);
+        BattleAPI::updateItemTypeMaterial($item_type_id, $item_type->item_materials);
+        BattleAPI::updateItemTypeJobClass($item_type_id, $item_type->item_job_classes);
+        return $item_type_id;
+    }
+
+    function deleteItemTypeMaterial($item_type_id) {
+        $daItem = ItemDAO::singleton();
+        return $daItem->deleteItemTypeMaterial($item_type_id);
+    }
+
+    function updateItemTypeMaterial($item_type_id, $item_materials) {
+        BattleAPI::deleteItemTypeMaterial($item_type_id, $item_materials);
+
+        $daItem = ItemDAO::singleton();
+        return $daItem->updateItemTypeMaterial($item_type_id, $item_materials);
+    }
+
+    function deleteItemTypeJobClass($item_type_id) {
+        $daItem = ItemDAO::singleton();
+        return $daItem->deleteItemTypeJobClass($item_type_id);
+    }
+
+    function updateItemTypeJobClass($item_type_id, $job_classes) {
+        BattleAPI::deleteItemTypeJobClass($item_type_id, $job_classes);
+
+        $daItem = ItemDAO::singleton();
+        return $daItem->updateItemTypeJobClass($item_type_id, $job_classes);
+    }
 }

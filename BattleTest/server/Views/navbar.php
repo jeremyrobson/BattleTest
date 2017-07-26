@@ -37,14 +37,13 @@
 
       <!-- View -->
       <li class="nav-item dropdown">
-        <a class="nav-link <?php if (!$logged) { echo 'disabled'; } ?> <?php if (in_array($page, array("party","inventory","stats","formation"))) { echo 'active'; } ?> dropdown-toggle" id="navbarDropdownMenuLink" href="#" data-toggle="dropdown">
+        <a class="nav-link <?php if (!$logged) { echo 'disabled'; } ?> <?php if (in_array($page, array("party","material","itemtype","jobclass"))) { echo 'active'; } ?> dropdown-toggle" id="navbarDropdownMenuLink" href="#" data-toggle="dropdown">
             View
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
           <a class="dropdown-item" href="index.php?page=party">Party</a>
-          <a class="dropdown-item" href="index.php?page=inventory">Inventory</a>
-          <a class="dropdown-item" href="index.php?page=stats">Stats</a>
-          <a class="dropdown-item" href="index.php?page=formation">Formation</a>
+          <a class="dropdown-item" href="index.php?page=material">Materials</a>
+          <a class="dropdown-item" href="index.php?page=itemtype">Item Types</a>
           <a class="dropdown-item" href="index.php?page=jobclass">Job Classes</a>
         </div>
       </li>
