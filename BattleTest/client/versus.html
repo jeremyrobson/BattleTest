@@ -1,0 +1,454 @@
+<!doctype html>
+<html>
+<head>
+<script>
+
+var teamcolors = ["rgb(255,0,0)", "rgb(0,127,0)"];
+var actioncolors = {
+    "heal" : "0,255,0",
+    "attack" : "255,0,0"
+};
+var unitcount = 0;
+
+function clamp(val, min, max) {
+    if (val < min) return min;
+    if (val > max) return max;
+    return val;
+}
+
+function getDistance(a, b) {
+    var dx = a.x - b.x;
+    var dy = a.y - b.y;
+    return Math.floor(Math.sqrt(dx * dx + dy * dy));
+}
+
+function pause() {
+    this.paused = true;
+}
+
+function unpause() {
+    this.paused = false;
+    loop();
+}
+
+class HPBox {
+    constructor(unit) {
+        this.unit = unit;
+        this.maxwidth = 24;
+    }
+
+    update() {
+        this.x = this.unit.x - 8;
+        this.y = this.unit.y - 16;
+        this.width = this.unit.hp / this.unit.maxhp * this.maxwidth;
+        this.height = 4;
+    }
+
+    draw(ctx) {
+        ctx.strokeStyle = "rgb(0,0,0)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(this.x, this.y, this.maxwidth, this.height);
+        ctx.fillStyle = "rgb(0,255,0)";
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+    }
+}
+
+class Circle {
+    constructor(x, y, maxRadius, rgb) {
+        this.x = x;
+        this.y = y;
+        this.radius = 0;
+        this.alpha = 1.0;
+        this.speed = 2;
+        this.maxRadius = maxRadius;
+        this.rgb = rgb;
+        this.color = "rgba(" + this.rgb + ",1.0)";
+        this.borderColor = "rgba(" + this.rgb + ",0.5)";
+        this.remove = false;
+    }
+
+    update() {
+        if (this.radius < this.maxRadius) {
+            this.radius += this.speed;
+            this.alpha = 1.0 - this.radius / this.maxRadius;
+        }
+        else {
+            this.remove = true;
+        }
+        this.borderColor = "rgba(" + this.rgb + "," + this.alpha + ")";
+        this.color = "rgba(" + this.rgb + "," + this.alpha / 2 + ")";
+    }
+
+    draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0,2*Math.PI);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.strokeStyle = this.borderColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
+}
+
+class Action {
+    constructor(actor, target, radius, type) {
+        this.actor = actor;
+        this.target = target
+        this.x = actor.x;
+        this.y = actor.y;
+        this.radius = radius;
+        this.type = type;
+        this.color = actioncolors[type];
+    }
+
+    invoke() {
+        createCircle(this.x, this.y, this.radius, this.color);
+
+        var damage = 0;
+        if (this.type === "heal") {
+            damage = -1; // Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + 2;
+        }
+        else {
+            damage = 1;
+        }
+        this.target.applyDamage(this.actor, damage);
+    }
+}
+
+class Unit {
+    constructor(team) {
+        this._id = unitcount;
+        this.team = team;
+        this.color = teamcolors[team];
+        this.x = Math.floor(Math.random() * 640);
+        this.y = Math.floor(Math.random() * 480);
+        this.maxhp = Math.floor(Math.random() * 100) + 50;
+        this.hp = this.maxhp;
+        this.ct = 0;
+        this.agl = 1; //Math.floor(Math.random() * 10) + 1;
+        this.ready = false;
+        this.range = Math.floor(Math.random() * 50) + 10;
+        this.r = this.range;
+        this.angle = 0;
+        this.dex = Math.floor(Math.random() * 2) + 1;
+        this.vel = 0;
+        this.status = "alive";
+        this.target = null;
+        this.targetQueue = [];
+        this.hpbox = new HPBox(this);
+
+        unitcount++;
+    }
+
+    addTargetToQueue(target, priority) {
+        //if target is priority
+        if (priority == 1) {
+            var oldtarget = this.target; //cache old target
+
+            this.target = target; //set new target
+
+            //save old target back in queue
+            this.addTargetToQueue(oldtarget, 2);
+
+            //remove new target from queue
+            this.removeTargetFromQueue(target);
+        }
+
+        //don't add target to queue that is already on deck
+        if (this.target && this.target._id === target._id) {
+            return;
+        }
+
+        var index = -1;
+        this.targetQueue.some(function(t, i) {
+            if (t.unit._id === target._id) {
+                index = i;
+                return true;
+            }
+        });
+
+        //if target not found in queue
+        if (index < 0) { //add to queue
+            this.targetQueue.push({
+                unit: target,
+                priority: priority,
+                distance: getDistance(this, target)
+            });
+        }
+        else { //update priority with lower number
+            this.targetQueue[index].priority = this.targetQueue[index].priority < priority ? this.targetQueue[index].priority : priority;
+        }
+
+        var self = this;
+        this.targetQueue.sort(function(a, b) {
+            if (a.priority < b.priority) {
+                return -1;
+            }
+            if (a.priority > b.priority) {
+                return 1;
+            }
+
+            var distanceA = getDistance(self, a.unit);
+            var distanceB = getDistance(self, b.unit);
+
+            a.distance = distanceA;
+            b.distance = distanceB;
+
+            if (distanceA < distanceB) {
+                return -1;
+            }
+            if (distanceA > distanceB) {
+                return 1;
+            }
+            
+            return 0;
+        });
+    }
+
+    removeTargetFromQueue(target) {
+        this.targetQueue = this.targetQueue.filter(function(t) {
+            return t.unit._id !== target._id;
+        });
+    }
+
+    acquireTargets() {
+        this.targetQueue = this.targetQueue.filter(function(target) {
+            return target.unit.status !== "dead";
+        });
+
+        units.forEach(function(unit) {
+            if (unit._id !== this._id && unit.status !== "dead") {
+                this.addTargetToQueue(unit, 3);
+            }
+        }, this);
+
+        if (this.targetQueue.length > 0) {
+            this.target = this.targetQueue.shift().unit;
+        }
+    }
+
+    applyDamage(actor, damage) {
+        this.hp -= damage;
+        if (this.hp <= 0) {
+            this.hp = 0;
+            this.status = "dead";
+            this.color = "rgb(0,0,0)";
+            this.target = null;
+        }
+        if (this.hp > this.maxhp) {
+            this.hp = this.maxhp;
+        }
+        this.addTargetToQueue(actor, 2);
+    }
+
+    setTarget(unit) {
+        this.target = unit;
+    }
+
+    printTargetQueue() {
+        var s = this._id + ":  ";
+        this.targetQueue.forEach(function(target) {
+            s += target.unit._id + ", ";
+        });
+        return s;
+    }
+
+    isEnemy(unit) {
+        return this.team !== unit.team;
+    }
+
+    update(ctx) {
+        this.move();
+
+        if (!this.ready && this.ct < 100) {
+            this.ct += this.agl
+            if (this.ct >= 100) {
+                this.ct = 100;
+                this.ready = true;
+            }
+        }
+
+        if (this.target) {
+            if (this.ready) {
+                var distance = getDistance(this.target, this)
+                if (distance <= this.range) {
+                    var action = null;
+                    if (this.target.isEnemy(this)) {
+                        action = new Action(this, this.target, this.range, "attack");
+                    }
+                    else {
+                        action = new Action(this, this.target, this.range, "heal");
+                    }
+                    action.invoke();
+                    this.ct = 0;
+                    this.ready = false;
+                }
+            }
+
+            if (this.target.status === "dead") {
+                if (this.target.isEnemy(this)) {
+                    this.target = null;
+                }
+                else {
+                    //todo
+                }
+            }
+        }
+
+        if (this.target === null) {
+            this.acquireTargets();
+        }
+
+        this.hpbox.update();
+    }
+
+    move() {
+        if (this.target) {
+            var tx = this.target.x;
+            var ty = this.target.y;
+            this.angle = Math.atan2(this.y - ty, this.x - tx);
+            
+            if (this.ready) {
+                var distance = getDistance(this, this.target);
+                this.vel = clamp((distance - this.r) / 10, -this.dex, this.dex);
+            }
+            else {
+                if (this.target.isEnemy(this)) {
+                    this.vel = -this.dex;
+                }
+            }
+        }
+
+        this.x = clamp(this.x - Math.cos(this.angle) * this.vel, 0, 640 - 24);
+        this.y = clamp(this.y - Math.sin(this.angle) * this.vel, 0, 480 - 24);
+    }
+
+    draw(ctx) {
+        ctx.fillStyle = this.color;
+        ctx.font = "24px Arial";
+        ctx.fillText(this._id, this.x - 6, this.y - 12);
+
+        if (this.ready && this.target) {
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = this.color;
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.target.x, this.target.y);
+            ctx.stroke();
+        }
+
+        this.hpbox.draw(ctx);
+    }
+}
+
+function createCircle(x, y, radius, color) {
+    var circle = new Circle(x, y, radius, color);
+    sprites.push(circle);
+}
+
+var canvas, context;
+var mouseX, mouseY;
+var paused = false;
+var units;
+var sprites;
+var selunit = null;
+
+function loop() {
+    units.forEach(function(unit) {
+        if (unit.status !== "dead") {
+            unit.update();
+        }
+    });
+
+    sprites = sprites.filter(function(sprite) {
+        return !sprite.remove;
+    })
+    
+    sprites.forEach(function(sprite) {
+        sprite.update();
+    });
+
+    draw();
+
+    if (!paused) {
+        window.requestAnimationFrame(loop);
+    }
+}
+
+function draw() {
+    context.clearRect(0,0,640,480);
+
+    sprites.forEach(function(sprite) {
+        sprite.draw(context);
+    });
+
+    if (selunit) {
+        context.fillStyle = "rgba(0,255,255,0.5)";
+        context.fillRect(selunit.x-12, selunit.y-12, 24, 24);
+    }
+
+    units.forEach(function(unit) {
+        unit.draw(context);
+    });
+
+}
+
+function getUnit(mx, my) {
+    var unit = null;
+    units.forEach(function(u) {
+        var distance = getDistance(u, {x: mx, y: my});
+        if (distance < 10) {
+            unit = u;
+        }
+    });
+    return unit;
+}
+
+function mouse_down(e) {
+    mx = e.offsetX;
+    my = e.offsetY;
+    
+    if (!selunit) {
+        selunit = getUnit(mx, my);
+    }
+    else {
+        var unit = getUnit(mx, my);
+        if (unit) {
+            selunit.addTargetToQueue(unit, 1);
+            selunit = null;
+        }
+    }
+}
+
+window.onload = function() {
+    canvas = document.getElementById("canvas");
+    context = canvas.getContext("2d");
+    context.textBaseline = "top";
+
+    canvas.onmousedown = mouse_down;
+    
+    mouseX = 0;
+    mouseY = 0;
+
+    units = [];
+    units.push(new Unit(0));
+    units.push(new Unit(0));
+    units.push(new Unit(1));
+    //units.push(new Unit(1));
+    //units.push(new Unit(1));
+    //units.push(new Unit(1));
+
+    sprites = [];
+
+    window.requestAnimationFrame(loop);
+};
+
+</script>
+</head>
+<body>
+
+<canvas id="canvas" width="640" height="480"></canvas>
+
+</body>
+
+</html>
