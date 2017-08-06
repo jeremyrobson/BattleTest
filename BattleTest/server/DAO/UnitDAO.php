@@ -133,6 +133,32 @@ class UnitDAO extends BaseDAO {
     function deleteUnit() {
         //never delete, just set status to deleted
     }
+
+    function updateUnitEquipment($user_id, $party_id, $unit_id, $equip) {
+        try {
+            $daItem = ItemDAO::singleton();
+            foreach ($equip as $item_class_id => $item_id) {
+                $params = array(
+                    ":unit_id" => $unit_id,
+                    ":item_id" => $item_id,
+                    ":item_class_id" => $item_class_id
+                );
+                $stmt = $this->pdo->prepare("
+                    INSERT INTO game_unit_item
+                    (unit_id, item_id, item_class_id)
+                    VALUES
+                    (:unit_id, :item_id, :item_class_id)
+                    ON DUPLICATE KEY UPDATE
+                ");
+                $stmt->execute($params);
+
+                $daItem->updateItem($user_id, $party_id, $item_id);
+            }
+        }
+        catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+    }
 };
 
 ?>

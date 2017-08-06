@@ -27,7 +27,7 @@ class Unit extends BaseObject {
         parent::__construct($arr);
         
         $this->max_hp = 50;
-        $this->equip = BattleAPI::getItemsByUnitId($this->unit_id);
+        $this->equip = BattleAPI::getItemsByUnitId($this->user_id, $this->unit_id);
     }
 }
 

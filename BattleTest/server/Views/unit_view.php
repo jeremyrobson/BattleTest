@@ -28,5 +28,7 @@
 <h2>Equipment</h2>
 
 <?php
-    include_once("equip.php");
+    include_once("unit_equip.php");
 ?>
+
+<a href="index.php?page=unit&action=equip&unit_id=1" class="btn btn-primary btn-lg">Equip</a>

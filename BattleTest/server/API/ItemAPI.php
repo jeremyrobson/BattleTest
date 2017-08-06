@@ -4,8 +4,12 @@ include_once("../server/DAO/ItemDAO.php");
 
 trait ItemAPI {
 
+    public static function getItemByItemId($user_id, $item_id) {
+        $daItem = ItemDAO::singleton();
+        return $daItem->getItemByItemId($item_id);
+    }
+
     public static function getItemsByUnitId($user_id, $unit_id) {
-        //todo: should this require user ownership of unit?
         $daItem = ItemDAO::singleton();
         return $daItem->getItemsByUnitId($unit_id);
     }
@@ -62,7 +66,7 @@ trait ItemAPI {
         $item_type_id = 1;
         $item_material_id = 1;
         $item_quality_id = 1;
-        $item_name = $item_materials[$item_material_id]->material_name . " " . $item_types[$item_type_id]->item_type_name;
+        $item_name = $item_materials[$item_material_id]->item_material_name . " " . $item_types[$item_type_id]->item_type_name;
         $params = array(
             "item_class_id" => 1,
             "item_type_id" => $item_type_id,

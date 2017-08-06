@@ -39,6 +39,22 @@ trait UnitAPI {
         return $daUnit->getUnitByUnitId($unit_id);
     }
 
+    public static function getBaseStats($user_id, $unit_id) {
+        $base = array(
+            "pow" => 0,
+            "def" => 0
+        );
+
+        return $base;
+    }
+
+    public static function updateUnitEquipment($user_id, $party_id, $unit_id, $equip) {
+        //todo: validate equipment
+
+        $daUnit = UnitDAO::singleton();
+        return $daUnit->updateUnitEquipment($user_id, $party_id, $unit_id, $equip);
+    }
+
 /*
     public static function validateUnit($user_id, $party_id, $unit) {
         $validate = new BaseValidate();

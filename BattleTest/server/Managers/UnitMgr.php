@@ -18,6 +18,9 @@ class UnitMgr extends BaseMgr {
         $this->template = "../server/Views/unit_list.php";
 
         switch ($action) {
+            case "equip":
+                $this->equip();
+                break;
             case "add":
                 $this->add();
                 break;
@@ -27,8 +30,8 @@ class UnitMgr extends BaseMgr {
             case "view":
                 $this->view();
                 break;
-            case "edit":
-                $this->edit();
+            case "update":
+                $this->update();
                 break;
             case "list":
             default:
@@ -99,6 +102,7 @@ class UnitMgr extends BaseMgr {
             $_SESSION["error_msg"] = $e->getMessage();
             $this->output["error"] = $e->error;
 
+            //this is essentially the add() action from above
             //todo: figure out better way of replicating add() action
             $this->template = "../server/Views/unit_add.php";
             $this->output["races"] = BattleAPI::getRaces();
@@ -137,6 +141,68 @@ class UnitMgr extends BaseMgr {
             $_SESSION["error_msg"] = $e->getMessage();
         }
 
+    }
+
+    function equip() {
+        $this->template = "../server/Views/equip.php";
+        $user_id = $_SESSION["user"]->user_id;
+        $unit_id = $this->input["get"]["unit_id"];
+
+        try {
+            $unit = BattleAPI::getUnitByUnitId($user_id, $unit_id);
+            $this->output["unit"] = $unit;
+            $this->output["items"] = BattleAPI::getItemsByPartyId($user_id, $unit_id);
+            $this->output["item_classes"] = BattleAPI::getItemClasses();
+
+            $this->output["base"] = BattleAPI::getBaseStats($user_id, $unit_id);
+            $this->output["total"] = BattleAPI::getBaseStats($user_id, $unit_id);
+        }
+        catch (BattleException $e) {
+            $_SESSION["error_msg"] = $e->getMessage();
+            $this->output["error"] = $e->error;
+            $this->redirect(array(
+                "page" => "unit",
+                "action" => "view",
+                "unit_id" => $unit_id
+            ));
+        }
+        catch (Exception $e) {
+            $_SESSION["error_msg"] = $e->getMessage();
+        }
+    }
+
+    function update() {
+        $this->template = "../server/Views/unit_view.php";
+        $user_id = $_SESSION["user"]->user_id;
+        $unit_id = $this->input["get"]["unit_id"];
+        
+
+        try {
+            $unit = BattleAPI::getUnitByUnitId($user_id, $unit_id);
+            $equip = $this->input["post"]["equip"];
+            BattleAPI::updateUnitEquipment($user_id, $unit->party_id, $unit_id, $equip);
+        }
+        catch (BattleException $e) {
+            $_SESSION["error_msg"] = $e->getMessage();
+            $this->output["error"] = $e->error;
+            $this->redirect(array(
+                "page" => "unit",
+                "action" => "equip",
+                "unit_id" => $unit_id
+            ));
+        }
+        catch (Exception $e) {
+            $_SESSION["error_msg"] = $e->getMessage();
+        }
+
+        die;
+
+        $_SESSION["success_msg"] = "Unit updated successfully!";
+        $this->redirect(array(
+            "page" => "unit",
+            "action" => "view",
+            "unit_id" => $unit_id
+        ));
     }
 
 }

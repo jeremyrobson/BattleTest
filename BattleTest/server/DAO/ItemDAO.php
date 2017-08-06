@@ -37,7 +37,7 @@ class ItemDAO extends BaseDAO {
         return $item;
     }
 
-    function getItemsByUnitId($user_id, $unit_id) {
+    function getItemsByUnitId($unit_id) {
         $items = array();
         try {
             $params = array(":unit_id" => $unit_id);
@@ -74,7 +74,7 @@ class ItemDAO extends BaseDAO {
             $stmt->execute($params);
 
             while ($row = $stmt->fetch()) {
-                $items[$row->item_class_id] = $row;
+                $items[$row->item_id] = $row;
             }
         }
         catch (PDOException $e) {
@@ -208,7 +208,7 @@ class ItemDAO extends BaseDAO {
         $item_qualities = array();
         try {
             $stmt = $this->pdo->prepare("
-                SELECT * FROM game_quality
+                SELECT * FROM game_item_quality
             ");
             $args = array();
             $stmt->setFetchMode(PDO::FETCH_CLASS, "ItemQuality", $args);
@@ -255,8 +255,8 @@ class ItemDAO extends BaseDAO {
                 ":item_type_id" => $item->item_type_id,
                 ":user_id" => $item->user_id,
                 ":party_id" => $item->party_id,
-                ":material_id" => $item->item_material_id,
-                ":quality_id" => $item->item_quality_id,
+                ":material_id" => $item->material_id,
+                ":quality_id" => $item->quality_id,
                 ":item_name" => $item->item_name,
                 ":_pow" => $item->_pow,
                 ":_def" => $item->_def,
@@ -274,7 +274,7 @@ class ItemDAO extends BaseDAO {
             );
             $stmt = $this->pdo->prepare("
                 INSERT INTO game_item
-                VALUES (:item_id, :item_class_id, :item_type_id, :user_id, :party_id, :item_material_id, :item_quality_id, :item_name, 
+                VALUES (:item_id, :item_class_id, :item_type_id, :user_id, :party_id, :material_id, :quality_id, :item_name, 
                 :_pow, :_def, :_acc, :_evd, :mod_range, :mod_move, :mod_hp, :mod_mp, :mod_str, :mod_agl, :mod_mag, :mod_sta, :price)
             ");
 
@@ -341,7 +341,7 @@ class ItemDAO extends BaseDAO {
             );
             $stmt = $this->pdo->prepare("
                 INSERT INTO game_item_type
-                VALUES (:item_class_id, :item_type_name, )
+                VALUES (:item_class_id, :item_type_name)
             ");
             $stmt->execute($params);
         }
@@ -448,6 +448,19 @@ class ItemDAO extends BaseDAO {
         return true;
     }
 
+    function updateItem($user_id, $party_id, $item_id) {
+        $params = array(
+            ":user_id" => $user_id,
+            ":party_id" => $party_id,
+            ":item_id" => $item_id
+        );
+        $stmt = $this->pdo->prepare("
+            UPDATE game_item
+            SET user_id = :user_id, party_id = :party_id
+            WHERE item_id = :item_id
+        ");
+        $stmt->execute($params);
+    }
 
 };
 
